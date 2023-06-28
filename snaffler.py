@@ -3,26 +3,27 @@ import sys
 import logging
 from snaffcore.go_snaffle import *
 from snaffcore.utilities import *
+from snaffcore.logger import *
 
 log = logging.getLogger('snafflepy')
-log.setLevel(logging.INFO)
+log.setLevel(logging.DEBUG)
 
 def parse_arguments():
     syntax_error = False
     print("SnafflePy by @robert-todora")
 
-    parser = argparse.ArgumentParser(add_help=True, prog='snafflepy', description='A "port" of Snaffler in python')
-    parser.add_argument("targets", nargs='+',type=make_targets,required=True, help="IPs, hostnames, CIDR ranges, or files contains targets to snaffle")
+    parser = argparse.ArgumentParser(add_help=True, prog='snaffler.py', description='A "port" of Snaffler in python')
+    parser.add_argument("targets", nargs='+',type=make_targets, help="IPs, hostnames, CIDR ranges, or files contains targets to snaffle")
     parser.add_argument("-u","--username", metavar='username',type=str, help="domain username")
     parser.add_argument("-p","--password", metavar='password',type=str, help="password for domain user")
-    #parser.add_argument('--dcip', metavar='[IP addr]', help="IP address of domain controller")
     parser.add_argument("-d", "--domain", metavar='domain', default="", help="FQDN domain to authenticate to")
+    parser.add_argument("-H", "--hash", metavar='hash', default="", help="NT hash for authentication")
+    parser.add_argument("-v", "--verbose", action='store_true', help="Show more info")
     parser.add_argument("--test", metavar='test', type=bool, default=False, help="switch to testing mode")
-    parser.add_argument("-f", "--file", help="path to file with list of targets")
-    options = parser.parse_args()
+    
 
     try:
-      if len(sys.argv) == 1:
+      if len(sys.argv) <= 1:
           parser.print_help()
           sys.exit(1)      
 
@@ -36,8 +37,16 @@ def parse_arguments():
           parser.print_help()
           sys.exit(2)
       else:
-          return options
-      
+            options = parser.parse_args()
+            
+            if options.verbose:
+              log.setLevel('DEBUG')
+
+            targets = set()
+            [[targets.add(t) for t in g] for g in options.targets]
+            options.targets = list(targets)
+            
+            return options
 
 def print_banner():
     print(r'''  
@@ -59,7 +68,7 @@ def main():
     begin_snaffle(snaffle_options)
     
 
-    print("I snaffled 'til the snafflin was done")
+    print("\nI snaffled 'til the snafflin was done")
 
 
 if __name__ == '__main__':
