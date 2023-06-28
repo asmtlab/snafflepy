@@ -1,11 +1,12 @@
+import sys
 from ldap3 import *
 from time import sleep
-import sys
+from .smb import *
 
 def begin_snaffle(options):
     print("Beginning the snaffle...")
     sleep(0.2)
-    print(options)
+    
 
     # TESTING
     if options.test:
@@ -22,14 +23,23 @@ def begin_snaffle(options):
             print("Error connecting to domain")
             print(conn.result)
             sys.exit(2)
-
-    else :  
+    else:
+        
+        # Login through LDAP    
         server = Server(options.dcip, get_info=ALL)
         conn = Connection(server)
         
-        if conn.bind():
-            print(server.info)
-        else:
+        if not conn.bind():            
             print("Error connecting to domain")
             print(conn.result)
             sys.exit(2)
+        
+        print(server.info)
+        
+        # Login via SMB 
+        smb_client = SMBClient(options.targets, options.username, options.password, options.domain)
+
+        logon_result = smb_client.login()
+
+        print(logon_result)
+
