@@ -1,37 +1,35 @@
 import argparse
 import sys
 import logging
-from snaffcore.begin import *
+from snaffcore.go_snaffle import *
+from snaffcore.utilities import *
 
-log = logging.getLogger('manspider')
+log = logging.getLogger('snafflepy')
 log.setLevel(logging.INFO)
 
 def parse_arguments():
     syntax_error = False
-    print("SnafflePy: A Port by @robert-todora")
+    print("SnafflePy by @robert-todora")
 
     parser = argparse.ArgumentParser(add_help=True, prog='snafflepy', description='A "port" of Snaffler in python')
+    parser.add_argument("targets", nargs='+',type=make_targets,required=True, help="IPs, hostnames, CIDR ranges, or files contains targets to snaffle")
     parser.add_argument("-u","--username", metavar='username',type=str, help="domain username")
     parser.add_argument("-p","--password", metavar='password',type=str, help="password for domain user")
-    parser.add_argument('--dcip', metavar='[IP addr]', required=True, help="IP address of domain controller")
+    #parser.add_argument('--dcip', metavar='[IP addr]', help="IP address of domain controller")
     parser.add_argument("-d", "--domain", metavar='domain', default="", help="FQDN domain to authenticate to")
-    parser.add_argument("-t", "--test", metavar='test', type=bool, default="False", help="switch to testing mode")
-
+    parser.add_argument("--test", metavar='test', type=bool, default=False, help="switch to testing mode")
+    parser.add_argument("-f", "--file", help="path to file with list of targets")
     options = parser.parse_args()
 
     try:
       if len(sys.argv) == 1:
           parser.print_help()
-          sys.exit(1)
-  
-      print(options.username, options.password, options.dcip, options.domain)
-      print(type(options.username), type(options.password), type(options.dcip), type(options.domain))
+          sys.exit(1)      
 
     except argparse.ArgumentError as e:
         syntax_error = True
         log.error(e)
         log.error('Check your syntax')
-        sys.exit(2)
 
     finally:
       if syntax_error:
