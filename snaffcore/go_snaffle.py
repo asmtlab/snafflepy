@@ -3,6 +3,8 @@ from ldap3 import *
 from time import sleep
 from .smb import *
 
+log = logging.getLogger('snafflepy')
+
 def begin_snaffle(options):
     print("Beginning the snaffle...")
     sleep(0.2)
@@ -25,21 +27,25 @@ def begin_snaffle(options):
             sys.exit(2)
     else:
         
-        # Login through LDAP    
-        server = Server(options.dcip, get_info=ALL)
-        conn = Connection(server)
+        # Login through LDAP  
+        #server = Server(options.targets[0], get_info=ALL)
+        #conn = Connection(server)
         
-        if not conn.bind():            
-            print("Error connecting to domain")
-            print(conn.result)
-            sys.exit(2)
+        # if not conn.bind():            
+        #     print("Error connecting to domain")
+        #     print(conn.result)
+        #     sys.exit(2)
         
-        print(server.info)
+        #print(server.info)
         
-        # Login via SMB 
-        smb_client = SMBClient(options.targets, options.username, options.password, options.domain)
+        # Login via SMB
+        for target in options.targets:
+            try:
+                smb_client = SMBClient(target, options.username, options.password, options.domain, options.hash)
+                smb_client.login()
+                
+                for share in smb_client.shares:
+                    print(share)
 
-        logon_result = smb_client.login()
-
-        print(logon_result)
-
+            except Exception as e:
+                print("Exception: ", e)

@@ -39,7 +39,7 @@ class SMBClient:
             resp = self.conn.listShares()
             for i in range(len(resp)):
                 sharename = resp[i]['shi1_netname'][:-1]
-                log.debug(f'{self.server}: Found share: {sharename}')
+                log.info(f'{self.server}: Found share: {sharename}')
                 yield sharename
             
         except Exception as e:
@@ -59,8 +59,9 @@ class SMBClient:
         if self.conn is None or refresh:
             try:
                 self.conn = SMBConnection(self.server, self.server, sess_port=445, timeout=20)
+                #print("Here: ", self.conn)
             except Exception as e:
-                log.debug(impacket_error(e))
+                print("Exception: ", impacket_error(e))
                 return None
 
             try:
