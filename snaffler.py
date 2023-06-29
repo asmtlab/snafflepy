@@ -1,12 +1,13 @@
 import argparse
 import sys
 import logging
+
 from snaffcore.go_snaffle import *
 from snaffcore.utilities import *
 from snaffcore.logger import *
 
 log = logging.getLogger('snafflepy')
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 def parse_arguments():
     syntax_error = False
@@ -19,7 +20,12 @@ def parse_arguments():
     parser.add_argument("-d", "--domain", metavar='domain', default="", help="FQDN domain to authenticate to")
     parser.add_argument("-H", "--hash", metavar='hash', default="", help="NT hash for authentication")
     parser.add_argument("-v", "--verbose", action='store_true', help="Show more info")
-    parser.add_argument("--test", metavar='test', type=bool, default=False, help="switch to testing mode")
+
+    # TODO
+    parser.add_argument("-i", "--no-discovery", action='store_true', help="Disables computer and share discovery (more stealthy)")
+    parser.add_argument("-n", "--disable-computer-discovery", action='store_true', help="Disable computer discovery, requires a list of hosts to do discovery on")
+
+
     
 
     try:
@@ -39,8 +45,21 @@ def parse_arguments():
       else:
             options = parser.parse_args()
             
+            # TODO
             if options.verbose:
               log.setLevel('DEBUG')
+
+            # TODO
+            if options.hash:
+                pass
+            
+            # TODO 
+            if options.no_discovery:
+                pass
+            
+            # TODO
+            if options.disable_computer_discovery:
+                pass                
 
             targets = set()
             [[targets.add(t) for t in g] for g in options.targets]
@@ -58,6 +77,7 @@ O~~    O~~                     O~     O~    O~~          O~~    O~~
 O~~    O~~ O~~  O~~O~~   O~~   O~~    O~~   O~~O~        O~~           O~~  
   O~~ ~~  O~~~  O~~  O~~ O~~~  O~~    O~~  O~~~  O~~~~   O~~          O~~   
                                                                     O~~     ''')
+    
     print("")
     print("")
 
@@ -69,6 +89,8 @@ def main():
     
 
     print("\nI snaffled 'til the snafflin was done")
+    sleep(0.2)
+    print("View log file at ~/.snafflepy/logs/")
 
 
 if __name__ == '__main__':

@@ -1,13 +1,17 @@
 import ntpath
 import struct
 import logging
+
 from .errors import *
 from impacket.nmb import NetBIOSError, NetBIOSTimeout
 from impacket.smbconnection import SessionError, SMBConnection
 
+
+
+# RT: Stolen from manspider - https://github.com/blacklanternsecurity/MANSPIDER
+
 # set up logging
-# Stolen from https://github.com/blacklanternsecurity/MANSPIDER
-log = logging.getLogger('snafflerpy.smb')
+log = logging.getLogger('snafflepy.smb')
 
 
 class SMBClient:

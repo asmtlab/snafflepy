@@ -9,6 +9,8 @@ from logging.handlers import QueueHandler, QueueListener
 
 ### PRETTY COLORS ###
 
+# RT: Stolen from manspider - https://github.com/blacklanternsecurity/MANSPIDER
+
 
 class ColoredFormatter(logging.Formatter):
 
@@ -85,6 +87,8 @@ console = logging.StreamHandler(stdout)
 # tell the handler to use this format
 console.setFormatter(ColoredFormatter('%(levelname)s %(message)s'))
 
+
+
 ### LOG TO FILE ###
 
 log_queue = Queue()
@@ -97,4 +101,6 @@ logdir.mkdir(parents=True, exist_ok=True)
 logfile = f'snafflepy_{datetime.now().strftime("%m-%d-%Y")}.log'
 handler = logging.FileHandler(str(logdir / logfile))
 handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+
+logging.getLogger('snafflepy').addHandler(console)
 logging.getLogger('snafflepy').addHandler(handler)

@@ -4,9 +4,9 @@ from impacket.nmb import NetBIOSError, NetBIOSTimeout
 from impacket.smb import SessionError, UnsupportedFeature
 from impacket.smbconnection import SessionError as CSessionError
 
-# Stolen from https://github.com/blacklanternsecurity/MANSPIDER
+# RT: Stolen from manspider - https://github.com/blacklanternsecurity/MANSPIDER
 # set up logging
-log = logging.getLogger('snafflerpy')
+log = logging.getLogger('snafflepy')
 
 
 class SnafflerError(Exception):

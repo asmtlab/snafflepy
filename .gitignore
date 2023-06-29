@@ -1,6 +1,6 @@
 # created by virtualenv automatically
 snaffcore/__pycache__/
-active_directory/
+snaffcore/active_directory/
 .idea
 .vscode
 snafflepy/

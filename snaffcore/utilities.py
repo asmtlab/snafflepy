@@ -6,7 +6,7 @@ import logging
 import ipaddress
 from pathlib import Path
 
-# Stolen from https://github.com/blacklanternsecurity/MANSPIDER
+# RT: Stolen from manspider - https://github.com/blacklanternsecurity/MANSPIDER
 
 log = logging.getLogger('snafflerpy.util')
 

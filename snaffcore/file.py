@@ -3,12 +3,13 @@ from .utilities import *
 from .errors import *
 from pathlib import Path
 
+# RT: Stolen from manspider - https://github.com/blacklanternsecurity/MANSPIDER
 
 class RemoteFile():
     '''
     Represents a file on an SMB share
-    Passed from a spiderling up to its parent spide
-r    '''
+    Passed from a spiderling up to its parent spider    
+    '''
 
     def __init__(self, name, share, target, size=0):
 
