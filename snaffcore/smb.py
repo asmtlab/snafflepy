@@ -63,7 +63,6 @@ class SMBClient:
         if self.conn is None or refresh:
             try:
                 self.conn = SMBConnection(self.server, self.server, sess_port=445, timeout=20)
-                #print("Here: ", self.conn)
             except Exception as e:
                 print("Exception: ", impacket_error(e))
                 return None
