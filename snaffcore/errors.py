@@ -12,14 +12,18 @@ log = logging.getLogger('snafflepy')
 class SnafflerError(Exception):
     pass
 
+
 class FileRetrievalError(SnafflerError):
     pass
+
 
 class ShareListError(SnafflerError):
     pass
 
+
 class FileListError(SnafflerError):
     pass
+
 
 class LogonFailure(SnafflerError):
     pass

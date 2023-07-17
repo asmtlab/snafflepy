@@ -82,7 +82,7 @@ def bytes_to_human(_bytes):
     count = 0
     for size in sizes:
         units[size] = pow(1024, count)
-        count +=1
+        count += 1
 
     for size in sizes:
         if abs(_bytes) < 1024.0:
@@ -94,6 +94,7 @@ def bytes_to_human(_bytes):
         _bytes /= 1024
 
     raise ValueError
+
 
 '''
 def better_decode(b):
@@ -107,6 +108,7 @@ def better_decode(b):
     except Exception:
         return str(b)[2:-1]
 '''
+
 
 def random_string(length):
 
@@ -139,3 +141,11 @@ def rmdir(directory):
         else:
             item.unlink()
     directory.rmdir()
+
+def get_domain_dn(domain):
+    base_dn = ''
+    domain_parts = domain.split('.')
+    for i in domain_parts:
+        base_dn += 'DC=%s,' % i
+    base_dn = base_dn[:-1]
+    return base_dn

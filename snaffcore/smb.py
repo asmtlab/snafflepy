@@ -7,7 +7,6 @@ from impacket.nmb import NetBIOSError, NetBIOSTimeout
 from impacket.smbconnection import SessionError, SMBConnection
 
 
-
 # RT: Stolen from manspider - https://github.com/blacklanternsecurity/MANSPIDER
 
 # set up logging
@@ -31,10 +30,9 @@ class SMBClient:
         self.nthash = nthash
         if self.nthash:
             # means no password, see https://yougottahackthat.com/blog/339/what-is-aad3b435b51404eeaad3b435b51404ee
-            self.lmhash = 'aad3b435b51404eeaad3b435b51404ee' 
+            self.lmhash = 'aad3b435b51404eeaad3b435b51404ee'
         else:
             self.lmhash = ''
-
 
     @property
     def shares(self):
@@ -45,12 +43,10 @@ class SMBClient:
                 sharename = resp[i]['shi1_netname'][:-1]
                 log.info(f'{self.server}: Found share: {sharename}')
                 yield sharename
-            
+
         except Exception as e:
             e = handle_impacket_error(e, self)
             log.warning(f'{self.server}: Error listing shares: {e}')
-            
-
 
     def login(self, refresh=False, first_try=True):
         '''
@@ -62,10 +58,13 @@ class SMBClient:
 
         if self.conn is None or refresh:
             try:
-                self.conn = SMBConnection(self.server, self.server, sess_port=445, timeout=20)
+                self.conn = SMBConnection(
+                    self.server, self.server, sess_port=445, timeout=10)
             except Exception as e:
-                print("Exception: ", impacket_error(e))
-                return None
+                log.info(f"Timeout exceeded, unable to connect to {self.server}")
+                # log.debug("Exception: ", impacket_error(e))
+                # self.conn = SMBConnection(
+                #     self.server, self.server, sess_port=139, timeout=10)
 
             try:
 
@@ -73,7 +72,8 @@ class SMBClient:
                     # skip to guest / null session
                     assert False
 
-                log.debug(f'{self.server}: Authenticating as "{self.domain}\\{self.username}"')
+                log.debug(
+                    f'{self.server}: Authenticating as "{self.domain}\\{self.username}"')
 
                 # pass the hash if requested
                 if self.nthash and not self.password:
@@ -92,7 +92,8 @@ class SMBClient:
                         domain=self.domain,
                     )
 
-                log.info(f'{self.server}: Successful login as "{self.username}"')
+                log.info(
+                    f'{self.server}: Successful login as "{self.username}"')
                 return True
 
             except Exception as e:
@@ -103,11 +104,13 @@ class SMBClient:
                 # try guest account, then null session if logon failed
                 if first_try:
 
-                    bad_statuses = ['LOGON_FAIL', 'PASSWORD_EXPIRED', 'LOCKED_OUT', 'SESSION_DELETED']
+                    bad_statuses = [
+                        'LOGON_FAIL', 'PASSWORD_EXPIRED', 'LOCKED_OUT', 'SESSION_DELETED']
                     if any([s in str(e) for s in bad_statuses]):
                         for s in bad_statuses:
                             if s in str(e):
-                                log.warning(f'{self.server}: {s}: {self.username}')
+                                log.warning(
+                                    f'{self.server}: {s}: {self.username}')
 
                     log.debug(f'{self.server}: Trying guest session')
                     self.username = 'Guest'
@@ -124,7 +127,6 @@ class SMBClient:
 
         else:
             return True
-
 
     def ls(self, share, path):
         '''
@@ -143,14 +145,14 @@ class SMBClient:
                     yield f
         except Exception as e:
             e = handle_impacket_error(e, self)
-            raise FileListError(f'{e.args}: Error listing files at "{share}{nt_path}"')
-
-
+            raise FileListError(
+                f'{e.args}: Error listing files at "{share}{nt_path}"')
 
     def rebuild(self, error=''):
         '''
         Rebuild our SMBConnection() if it gets borked
         '''
 
-        log.debug(f'Rebuilding connection to {self.server} after error: {error}')
+        log.debug(
+            f'Rebuilding connection to {self.server} after error: {error}')
         self.login(refresh=True)

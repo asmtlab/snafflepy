@@ -15,11 +15,11 @@ from logging.handlers import QueueHandler, QueueListener
 class ColoredFormatter(logging.Formatter):
 
     color_mapping = {
-        'DEBUG':    69, # blue
-        'INFO':     118, # green
-        'WARNING':  208, # orange
-        'ERROR':    196, # red
-        'CRITICAL': 196, # red
+        'DEBUG':    69,  # blue
+        'INFO':     118,  # green
+        'WARNING':  208,  # orange
+        'ERROR':    196,  # red
+        'CRITICAL': 196,  # red
     }
 
     char_mapping = {
@@ -37,30 +37,26 @@ class ColoredFormatter(logging.Formatter):
 
         super().__init__(pattern)
 
-
     def format(self, record):
 
         colored_record = copy(record)
         levelname = colored_record.levelname
         levelchar = self.char_mapping.get(levelname, '+')
-        seq = self.color_mapping.get(levelname, 15) # default white
+        seq = self.color_mapping.get(levelname, 15)  # default white
         colored_levelname = f'{self.prefix}{seq}m[{levelchar}]{self.suffix}'
         colored_record.levelname = colored_levelname
 
         return logging.Formatter.format(self, colored_record)
-
 
     @classmethod
     def green(cls, s):
 
         return cls.color(s)
 
-
     @classmethod
     def red(cls, s):
 
         return cls.color(s, level='ERROR')
-
 
     @classmethod
     def color(cls, s, level='INFO'):
@@ -69,11 +65,11 @@ class ColoredFormatter(logging.Formatter):
         return f'{cls.prefix}{color}m{s}{cls.suffix}'
 
 
-
 class CustomQueueListener(QueueListener):
     '''
     Ignore errors in the monitor thread that result from a race condition when the program exits
     '''
+
     def _monitor(self):
         try:
             super()._monitor()
@@ -88,7 +84,6 @@ console = logging.StreamHandler(stdout)
 console.setFormatter(ColoredFormatter('%(levelname)s %(message)s'))
 
 
-
 ### LOG TO FILE ###
 
 log_queue = Queue()
@@ -100,7 +95,8 @@ logdir = Path.home() / '.snafflepy' / 'logs'
 logdir.mkdir(parents=True, exist_ok=True)
 logfile = f'snafflepy_{datetime.now().strftime("%m-%d-%Y")}.log'
 handler = logging.FileHandler(str(logdir / logfile))
-handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+handler.setFormatter(logging.Formatter(
+    '%(asctime)s %(levelname)s %(message)s'))
 
 logging.getLogger('snafflepy').addHandler(console)
 logging.getLogger('snafflepy').addHandler(handler)
