@@ -63,7 +63,7 @@ class SMBClient:
                     self.server, self.server, sess_port=445, timeout=10)
             except Exception as e:
                 # log.info(f"Timeout exceeded, unable to connect to {self.server}")
-                log.debug("Exception: ", impacket_error(e))
+                e = handle_impacket_error(e, self, display=True)
                 # self.conn = SMBConnection(
                 #     self.server, self.server, sess_port=139, timeout=10)
 

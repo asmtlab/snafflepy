@@ -60,24 +60,21 @@ def begin_snaffle(options):
             try:
                 smb_client = SMBClient(
                     target, options.username, options.password, options.domain, options.hash)
-                if smb_client.login():
-                    for share in smb_client.shares:
-                        try:
-                            files = smb_client.ls(share, "")
-                            
-                            for file in files:
-                                # filelist.append(file)
-                                # Ask do they want file sizes?
-                                # log.info(f"{target} Found file in {share}: {file.get_longname()}")
-                                naive_classify(share, file)
-                                # log.info(f"{target} Found file in {share}: {file}")
-
-                        except FileListError:
-                            log.error(
-                                "Access Denied, cannot list files in %s" % share)
-                            continue
-                else:
-                    log.error(f"Log on to {target} failed")
+                smb_client.login()
+                for share in smb_client.shares:
+                    try:
+                        files = smb_client.ls(share, "")
+                        
+                        for file in files:
+                            # filelist.append(file)
+                            # Ask do they want file sizes?
+                            # log.info(f"{target} Found file in {share}: {file.get_longname()}")
+                            naive_classify(share, file)
+                            # log.info(f"{target} Found file in {share}: {file}")
+                    except FileListError:
+                        log.error(
+                            "Access Denied, cannot list files in %s" % share)
+                        continue
 
             except Exception as e:
                 log.error(f"Error creating SMBClient object, {e}")
@@ -88,24 +85,24 @@ def access_ldap_server(ip, username, password):
     server = Server(ip, get_info=DSA)
     try:
         conn = Connection(server, username, password)
-        log.debug(server.schema)
+        # log.debug(server.schema)
 
         if not conn.bind():
             log.critical(f"Unable to bind to {server} as {username}, ")
         return conn
 
     except Exception as e:
-        log.critical(f'Error logging in to {ip}, {e}')
+        log.critical(f'Error logging in to {ip}')
         log.info("Trying guest session... ")
 
         try:
             conn = Connection(server, username='Guest', password='')
             if not conn.bind():
-                log.critical(f"Unable to bind to {server} as {username}, ")
+                log.critical(f"Unable to bind to {server} as {username}")
             return conn
 
         except Exception as e:
-            log.critical(f'Error logging in to {ip}, as {username}; {e}')
+            log.critical(f'Error logging in to {ip}, as {username}')
             log.info("Trying null session... ")
 
             conn = Connection(server, username='', password='')
