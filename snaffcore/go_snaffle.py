@@ -9,11 +9,21 @@ from .smb import *
 from .utilities import *
 from .file import *
 from .classifier import *
+import pprint
 
 log = logging.getLogger('snafflepy')
 
 
 def begin_snaffle(options):
+
+    # Prepare classifiers for use in naive_classify()
+    snaff_rules = Rules()
+    # prepped_rules = snaff_rules.prepare_classifiers()
+    # for dict_rules in prepped_rules:
+    #   for actual_rule in dict_rules['ClassifierRules']:
+    #       pprint.pprint(actual_rule['Triage'])
+
+
     print("Beginning the snaffle...")
     sleep(0.2)
 
@@ -41,7 +51,7 @@ def begin_snaffle(options):
                 log.debug(f"Exception: {e}")
                 log.warning(f"Unable to add{target} to targets to snaffle")
                 continue
-    log.info(f"Targets that will be snaffled: {options.targets}")
+    log.debug(f"Targets that will be snaffled: {options.targets}")
 
     # Login via SMB
     # log.info("Preparing classifiers...")
@@ -69,7 +79,7 @@ def begin_snaffle(options):
                             # filelist.append(file)
                             # Ask do they want file sizes?
                             # log.info(f"{target} Found file in {share}: {file.get_longname()}")
-                            naive_classify(share, file)
+                            naive_classify(share, file, prepped_rules)
                             # log.info(f"{target} Found file in {share}: {file}")
                     except FileListError:
                         log.error(
@@ -78,6 +88,8 @@ def begin_snaffle(options):
 
             except Exception as e:
                 log.error(f"Error creating SMBClient object, {e}")
+    
+    
 
 
 def access_ldap_server(ip, username, password):
@@ -139,10 +151,11 @@ def list_computers(connection: Connection, domain):
         return None
 
 # TODO
-def naive_classify(share, file):
+def naive_classify(share, file, rules:Rules):
     log.info(f"{share}: {file.get_longname()}")
+    
 
-    if is_interest(file):
+    if is_interest(file, rules):
         log.info(f"Found interesting file: {share}/{file}")
 
 
