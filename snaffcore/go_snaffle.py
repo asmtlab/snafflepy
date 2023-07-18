@@ -18,16 +18,18 @@ def begin_snaffle(options):
     sleep(0.2)
 
     if(not options.domain):
-        log.info("Domain not given, retrieving automatically.")
+        log.info("Domain not provided, retrieving automatically.")
         s = Server(options.targets[0], get_info = ALL)
         c = Connection(s)
         if(not c.bind()):
              log.error("Could not get domain automatically")
+             sys.exit(1)
         else:  
              try:
                 options.domain = s.info.other["ldapServiceName"][0].split("@")[1]
              except Exception as e:
                  log.error("Could not get domain automatically")
+                 sys.exit(1)
         c.unbind()
 
     domain_names = []
