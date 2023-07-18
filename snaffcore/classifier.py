@@ -25,6 +25,7 @@ class Rules:
 
 
 # TODO
+
 def is_interest(file):
     # massive_wordlist = prepare_classifiers()
     # print(massive_wordlist)
