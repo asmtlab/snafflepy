@@ -47,7 +47,7 @@ class SMBClient:
 
         except Exception as e:
             e = handle_impacket_error(e, self)
-            log.warning(f'{self.server}: Error listing shares: {e}')
+            log.debug(f'{self.server}: Error listing shares: {e}')
 
     def login(self, refresh=False, first_try=True):
         '''
@@ -93,14 +93,14 @@ class SMBClient:
                         domain=self.domain,
                     )
 
-                log.info(
+                log.debug(
                     f'{self.server}: Successful login as "{self.username}"')
                 return True
 
             except Exception as e:
 
                 if type(e) != AssertionError:
-                    e = handle_impacket_error(e, self, display=True)
+                    e = handle_impacket_error(e, self, display=False)
 
                 # try guest account, then null session if logon failed
                 if first_try:
@@ -113,14 +113,14 @@ class SMBClient:
                                 log.warning(
                                     f'{self.server}: {s}: {self.username}')
 
-                    log.debug(f'{self.server}: Trying guest session')
+                    log.warning(f'{self.server}: Trying guest session')
                     self.username = 'Guest'
                     self.password = ''
                     self.domain = ''
                     self.nthash = ''
                     guest_success = self.login(refresh=True, first_try=False)
                     if not guest_success:
-                        log.debug(f'{self.server}: Switching to null session')
+                        log.warning(f'{self.server}: Switching to null session')
                         self.username = ''
                         self.login(refresh=True, first_try=False)
 

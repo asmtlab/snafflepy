@@ -14,21 +14,18 @@ class Rules:
         self.postmatch_classifiers = []
 
 
-    def prepare_classifiers():
-        snafflepy_path = "./snaffcore/DefaultRules/"
+    def prepare_classifiers(self):
+        share_path = "./snaffcore/DefaultRules/"
 
-        toml_dict = []
-        for root, dirs, files in os.walk(snafflepy_path, topdown=False):
+        for root, dirs, files in os.walk(share_path, topdown=False):
             for name in files:
-                print(os.path.join(root,name))
+                # print(os.path.join(root,name))
                 with open(os.path.join(root, name), 'r') as tfile:
-                    toml_dict.append(toml.load(tfile))
-
-        return toml_dict
+                    yield toml.load(tfile)
 
 
-
-def is_interest(file):
+# TODO
+def is_interest(file, rules:Rules):
     # massive_wordlist = prepare_classifiers()
     # print(massive_wordlist)
     # for root, dirs, files in os.walk(snafflepy_path, topdown=False):
