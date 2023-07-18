@@ -25,7 +25,8 @@ class Rules:
 
 
 # TODO
-def is_interest(file, rules:Rules):
+
+def is_interest(file):
     # massive_wordlist = prepare_classifiers()
     # print(massive_wordlist)
     # for root, dirs, files in os.walk(snafflepy_path, topdown=False):
