@@ -8,6 +8,7 @@ from time import sleep
 from .smb import *
 from .utilities import *
 from .file import *
+from .classifier import *
 
 log = logging.getLogger('snafflepy')
 
@@ -18,21 +19,23 @@ def begin_snaffle(options):
 
     domain_names = []
     # TODO: Talk to AD via LDAP to get list of computers with file shares
-    if options.no_discovery or options.disable_computer_discovery:
-        log.debug(
+    if options.disable_computer_discovery:
+        log.info(
             "Computer discovery is turned off. Snaffling will only occur on the host(s) specified.")
-        
+
     else:
-        login = access_ldap_server(options.targets[0], options.username, options.password)
+        login = access_ldap_server(
+            options.targets[0], options.username, options.password)
         domain_names = list_computers(login, options.domain)
         # list_computers() returns list so need to individually add entry
         for target in domain_names:
-            log.info(
+            log.debug(
                 f"Found{target}, adding to targets to snaffle...")
             sleep(0.5)
             try:
                 # TODO: Try to fix this? - How to resolve local IP address from Hostname
-                #ip = resolve(options.domain, target)
+                # Supposedly SMBConnection should be able to take a hostname but not working as intended on the HTB enviroment I am using for testing
+                # ip = resolve(options.domain, target)
                 options.targets.append(target)
             except Exception as e:
                 log.debug(f"Exception: {e}")
@@ -41,33 +44,52 @@ def begin_snaffle(options):
     log.info(f"Targets that will be snaffled: {options.targets}")
 
     # Login via SMB
-    for target in options.targets:
+    # log.info("Preparing classifiers...")
+    # prepare_classifiers()
+
+    if options.no_share_discovery:
         try:
             smb_client = SMBClient(
-                target, options.username, options.password, options.domain, options.hash)
-            smb_client.login()
+                options.targets[0], options.username, options.password, options.domain, options.hash)
+        except:
+            log.error(f"Error logging in to SMB on {options.targets[0]}")
 
-            for share in smb_client.shares:
-                try:
-                    files = smb_client.ls(share, "")
+    else:
+        log.info("Enumerating shares for files...")
+        for target in options.targets:
+            try:
+                smb_client = SMBClient(
+                    target, options.username, options.password, options.domain, options.hash)
+                if smb_client.login():
+                    for share in smb_client.shares:
+                        try:
+                            files = smb_client.ls(share, "")
+                            
+                            for file in files:
+                                # filelist.append(file)
+                                # Ask do they want file sizes?
+                                # log.info(f"{target} Found file in {share}: {file.get_longname()}")
+                                naive_classify(share, file)
+                                # log.info(f"{target} Found file in {share}: {file}")
 
-                    for file in files:
-                        log.info("Found file in %s: %s" % (share, file))
+                        except FileListError:
+                            log.error(
+                                "Access Denied, cannot list files in %s" % share)
+                            continue
+                else:
+                    log.error(f"Log on to {target} failed")
 
-                except FileListError:
-                    log.error("Access Denied, cannot list files in %s" % share)
-                    continue
-
-        except Exception as e:
-            log.error("Exception: ", e)
+            except Exception as e:
+                log.error(f"Error creating SMBClient object, {e}")
 
 
 def access_ldap_server(ip, username, password):
     log.info("Accessing LDAP Server")
     server = Server(ip, get_info=DSA)
-
     try:
         conn = Connection(server, username, password)
+        log.debug(server.schema)
+
         if not conn.bind():
             log.critical(f"Unable to bind to {server} as {username}, ")
         return conn
@@ -92,10 +114,12 @@ def access_ldap_server(ip, username, password):
                 return None
             return conn
 
+# 2nd snaffle step, finding additional targets from original target via LDAP queries
+
 
 def list_computers(connection: Connection, domain):
     dn = get_domain_dn(domain)
-    #filter = "(objectCategory=computer)"
+    # filter = "(objectCategory=computer)"
     if connection is None:
         log.critical("Connection is not established")
 
@@ -117,13 +141,12 @@ def list_computers(connection: Connection, domain):
         log.critical(f"Unable to list computers: {e}")
         return None
 
+# TODO
+def naive_classify(share, file):
+    log.info(f"{share}: {file.get_longname()}")
 
-
-
-
-
-
-
+    if is_interest(file):
+        log.info(f"Found interesting file: {share}/{file}")
 
 
 # def resolve(nameserver, host_fqdn):

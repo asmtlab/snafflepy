@@ -14,10 +14,11 @@ def parse_arguments():
     syntax_error = False
     print("SnafflePy by @robert-todora")
 
+    # TODO - Check that if targets > 1 then "-n" needs to be set to true
     parser = argparse.ArgumentParser(
         add_help=True, prog='snaffler.py', description='A "port" of Snaffler in python')
     parser.add_argument("targets", nargs='+', type=make_targets,
-                        help="IPs, hostnames, CIDR ranges, or files contains targets to snaffle")
+                        help="IPs, hostnames, CIDR ranges, or files contains targets to snaffle. If you are providing more than one target, the -n option must be used.")
     parser.add_argument("-u", "--username", metavar='username',
                         type=str, help="domain username")
     parser.add_argument("-p", "--password", metavar='password',
@@ -31,8 +32,8 @@ def parse_arguments():
     # parser.add_argument("-e", "--exclude",  )
 
     # TODO
-    parser.add_argument("-i", "--no-discovery", action='store_true',
-                        help="Disables computer and share discovery (more stealthy)")
+    parser.add_argument("-i", "--no-share-discovery", action='store_true',
+                        help="Disables share discovery (more stealthy)")
     parser.add_argument("-n", "--disable-computer-discovery", action='store_true',
                         help="Disable computer discovery, requires a list of hosts to do discovery on")
 
@@ -52,22 +53,8 @@ def parse_arguments():
             sys.exit(2)
         else:
             options = parser.parse_args()
-
-            # TODO
             if options.verbose:
                 log.setLevel('DEBUG')
-
-            # TODO
-            if options.hash:
-                pass
-
-            # TODO
-            if options.no_discovery:
-                pass
-
-            # TODO
-            if options.disable_computer_discovery:
-                pass
 
             targets = set()
             [[targets.add(t) for t in g] for g in options.targets]
@@ -97,8 +84,8 @@ def main():
     begin_snaffle(snaffle_options)
 
     print("\nI snaffled 'til the snafflin was done")
-    sleep(0.2)
     print("View log file at ~/.snafflepy/logs/")
+    sys.exit(1)
 
 
 if __name__ == '__main__':
