@@ -41,7 +41,8 @@ class SMBClient:
             resp = self.conn.listShares()
             for i in range(len(resp)):
                 sharename = resp[i]['shi1_netname'][:-1]
-                log.info(f'{self.server}: Found share: {sharename}')
+                remarkname = resp[i]['shi1_remark'][:-1]
+                log.info(f'{self.server}: Found share: {sharename}, Remark: {remarkname}')
                 yield sharename
 
         except Exception as e:
@@ -61,8 +62,8 @@ class SMBClient:
                 self.conn = SMBConnection(
                     self.server, self.server, sess_port=445, timeout=10)
             except Exception as e:
-                log.info(f"Timeout exceeded, unable to connect to {self.server}")
-                # log.debug("Exception: ", impacket_error(e))
+                # log.info(f"Timeout exceeded, unable to connect to {self.server}")
+                log.debug("Exception: ", impacket_error(e))
                 # self.conn = SMBConnection(
                 #     self.server, self.server, sess_port=139, timeout=10)
 
