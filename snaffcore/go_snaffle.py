@@ -27,6 +27,21 @@ def begin_snaffle(options):
     print("Beginning the snaffle...")
     sleep(0.2)
 
+    if(not options.domain):
+        log.info("Domain not provided, retrieving automatically.")
+        s = Server(options.targets[0], get_info = ALL)
+        c = Connection(s)
+        if(not c.bind()):
+             log.error("Could not get domain automatically")
+             sys.exit(1)
+        else:  
+             try:
+                options.domain = s.info.other["ldapServiceName"][0].split("@")[1]
+             except Exception as e:
+                 log.error("Could not get domain automatically")
+                 sys.exit(1)
+        c.unbind()
+
     domain_names = []
     # TODO: Talk to AD via LDAP to get list of computers with file shares
     if options.disable_computer_discovery:
