@@ -36,7 +36,7 @@ def begin_snaffle(options):
              sys.exit(1)
         else:  
              try:
-                options.domain = s.info.other["ldapServiceName"][0].split("@")[1]
+                options.domain = str(s.info.other["ldapServiceName"][0].split("@")[1]).lower()
              except Exception as e:
                  log.error("Could not get domain automatically")
                  sys.exit(1)
@@ -94,7 +94,7 @@ def begin_snaffle(options):
                             # filelist.append(file)
                             # Ask do they want file sizes?
                             # log.info(f"{target} Found file in {share}: {file.get_longname()}")
-                            naive_classify(share, file, prepped_rules)
+                            naive_classify(share, file)
                             # log.info(f"{target} Found file in {share}: {file}")
                     except FileListError:
                         log.error(
@@ -166,11 +166,11 @@ def list_computers(connection: Connection, domain):
         return None
 
 # TODO
-def naive_classify(share, file, rules:Rules):
+def naive_classify(share, file):
     log.info(f"{share}: {file.get_longname()}")
     
 
-    if is_interest(file, rules):
+    if is_interest(file):
         log.info(f"Found interesting file: {share}/{file}")
 
 
