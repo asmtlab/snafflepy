@@ -40,3 +40,6 @@ options:
 1. Print out every file in every share on all reachable targets 
 
 `python3 snaffler.py <IP> -u <username> -p <password> -d <domain> --go-loud` 
+
+## Output
+![example_snafflepy](https://github.com/robert-todora/snafflepy/assets/59801737/33c956da-ed00-4cb7-8444-bf158b67f1f8)
