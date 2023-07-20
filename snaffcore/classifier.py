@@ -44,7 +44,7 @@ class Rules:
                         log.warning(
                             f"{dict_rule['RuleName']} is invalid, please check your syntax!")
 
-        # pprint.pprint(self.share_classifiers)
+        #pprint.pprint(self.share_classifiers)
         # pprint.pprint(self.directory_classifiers)
         # pprint.pprint(self.file_classifiers)
         # pprint.pprint(self.contents_classifiers)
@@ -53,7 +53,7 @@ class Rules:
 # TODO
 
 
-def is_interest(file):
+def is_interest(file, rules):
     # massive_wordlist = prepare_classifiers()
     # print(massive_wordlist)
     # for root, dirs, files in os.walk(snafflepy_path, topdown=False):
