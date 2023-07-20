@@ -1,7 +1,7 @@
 import sys
-import socket
-import urllib.parse
-import dns.resolver
+# import socket
+# import urllib.parse
+# import dns.resolver
 
 from ldap3 import ALL_ATTRIBUTES, Server, Connection, DSA, ALL, SUBTREE
 from time import sleep
@@ -9,7 +9,7 @@ from .smb import *
 from .utilities import *
 from .file import *
 from .classifier import *
-import pprint
+# import pprint
 
 log = logging.getLogger('snafflepy')
 
@@ -173,23 +173,26 @@ def naive_classify(share, file, rules: Rules):
     if is_interest(file, rules):
         log.info(f"Found interesting file: {share}/{file}")
 
+# These functions resolve to public IP Address: 
 
-# def resolve(nameserver, host_fqdn):
-#     resolver = dns.resolver.Resolver()
-#     resolver.nameservers = [nameserver]
-#     answer = resolver.query(host_fqdn, "A")
-#     return answer
+''' 
+def resolve(nameserver, host_fqdn):
+    resolver = dns.resolver.Resolver()
+    resolver.nameservers = [nameserver]
+    answer = resolver.query(host_fqdn, "A")
+    return answer
 
 
-# def get_ip(target):
-#     try:
-#         print(socket.gethostbyname(target))
-#     except socket.gaierror:
-#         parsed_url = urllib.parse.urlparse(target)
-#         hostname = parsed_url.hostname
-#         try:
-#             answers = dns.resolver.query(hostname, 'A')
-#             for rdata in answers:
-#                 print(rdata.address)
-#         except dns.resolver.NXDOMAIN:
-#             print('ip not found')
+def get_ip(target):
+    try:
+        print(socket.gethostbyname(target))
+    except socket.gaierror:
+        parsed_url = urllib.parse.urlparse(target)
+        hostname = parsed_url.hostname
+        try:
+            answers = dns.resolver.query(hostname, 'A')
+            for rdata in answers:
+                print(rdata.address)
+        except dns.resolver.NXDOMAIN:
+            print('ip not found') 
+'''

@@ -34,3 +34,9 @@ options:
   -n, --disable-computer-discovery
                         Disable computer discovery, requires a list of hosts to do discovery on
 ~~~
+
+## Examples
+
+1. Print out every file in every share on all reachable targets 
+
+`python3 snaffler.py <IP> -u <username> -p <password> -d <domain> --go-loud` 

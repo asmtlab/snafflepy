@@ -62,6 +62,9 @@ def parse_arguments():
             [[targets.add(t) for t in g] for g in options.targets]
             options.targets = list(targets)
 
+            if len(options.targets) > 1 and not options.disable_computer_discovery:
+                log.error("If you have more than one target, then the -n option must be specified.")
+                sys.exit(2)
             return options
 
 
