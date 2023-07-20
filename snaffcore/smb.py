@@ -42,7 +42,7 @@ class SMBClient:
             for i in range(len(resp)):
                 sharename = resp[i]['shi1_netname'][:-1]
                 remarkname = resp[i]['shi1_remark'][:-1]
-                log.info(f'{self.server}: Found share: {sharename}, Remark: {remarkname}')
+                log.info(f'{self.server}: Share: {sharename}, Remark: {remarkname}')
                 yield sharename
 
         except Exception as e:

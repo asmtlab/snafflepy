@@ -66,45 +66,44 @@ def begin_snaffle(options):
                 log.debug(f"Exception: {e}")
                 log.warning(f"Unable to add{target} to targets to snaffle")
                 continue
+
     log.debug(f"Targets that will be snaffled: {options.targets}")
 
     # Login via SMB
     # log.info("Preparing classifiers...")
     # prepare_classifiers()
 
-    if options.no_share_discovery:
+    try:
+        smb_client = SMBClient(
+            options.targets[0], options.username, options.password, options.domain, options.hash)
+    except:
+        log.error(f"Error logging in to SMB on {options.targets[0]}")
+
+    log.warning("[GO LOUD ACTIVATED] Enumerating all shares for all files...")
+    for target in options.targets:
         try:
             smb_client = SMBClient(
-                options.targets[0], options.username, options.password, options.domain, options.hash)
-        except:
-            log.error(f"Error logging in to SMB on {options.targets[0]}")
+                target, options.username, options.password, options.domain, options.hash)
+            smb_client.login()
+            for share in smb_client.shares:
+                try:
+                    files = smb_client.ls(share, "")
 
-    if options.go_loud:
-        log.warning("[GO LOUD ACTIVATED] Enumerating all shares for all files...")
-        for target in options.targets:
-            try:
-                smb_client = SMBClient(
-                    target, options.username, options.password, options.domain, options.hash)
-                smb_client.login()
-                for share in smb_client.shares:
-                    try:
-                        files = smb_client.ls(share, "")
+                    for file in files:
+                        # filelist.append(file)
+                        # Ask do they want file sizes?
+                        if options.go_loud:
+                            log.info(f"{target}: {share}\\{file.get_longname()}")
+                        else:
+                            naive_classify(share, file, prepped_rules)
 
-                        for file in files:
-                            # filelist.append(file)
-                            # Ask do they want file sizes?
-                            log.info(f"{target} Found file in {share}: {file.get_longname()}")
-                            # naive_classify(share, file, prepped_rules)
-                            # log.info(f"{target} Found file in {share}: {file}")
-                    except FileListError:
-                        log.error(
-                            "Access Denied, cannot list files in %s" % share)
-                        continue
+                except FileListError:
+                    log.error(
+                        "Access Denied, cannot list files in %s" % share)
+                    continue
 
-            except Exception as e:
-                log.error(f"Error creating SMBClient object, {e}")
-    else: 
-        pass
+        except Exception as e:
+            log.error(f"Error creating SMBClient object, {e}")
 
 def access_ldap_server(ip, username, password):
     log.info("Accessing LDAP Server")
