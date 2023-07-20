@@ -2,6 +2,20 @@
 Snaffler reimplementation in Python - https://github.com/SnaffCon/Snaffler 
 
 Tested with Python 3.10.6
+
+This tool works by first sending a LDAP query to the specified target to discover other domain joined machines, and then attempts to login (authenticated or not) through SMB and retrieve interesting files (currently work in progress). 
+
+### Current Features: 
+1. Share enumeration
+2. File enumeration
+3. AD joined computer enumeration
+
+### Features to Add: 
+1. Classifier system from Snaffler to find only interesting files and discard the normal junk
+2. Utilize the "Triage" feature from Snaffler's toml files to output in pretty colors
+3. Make it way faster
+4. Output to JSON
+
 ## Use case:
 
 Sometimes you do not always have access to a domain joined windows machine when you want to Snaffle. With this tool, you can "snaffle" (just get every file from every file share as of right now, but I am working on adding the classifier system that the real Snaffler uses) from the comfort of your operating system of choice!  
