@@ -1,5 +1,6 @@
 # SnafflePy
 Snaffler reimplementation in Python - https://github.com/SnaffCon/Snaffler 
+Thank you to MANSPIDER for the helpful code that I stole: https://github.com/blacklanternsecurity/MANSPIDER
 
 Tested with Python 3.10.6
 
