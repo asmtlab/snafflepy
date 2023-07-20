@@ -1,7 +1,7 @@
 import sys
-import socket
-import urllib.parse
-import dns.resolver
+# import socket
+# import urllib.parse
+# import dns.resolver
 
 from ldap3 import ALL_ATTRIBUTES, Server, Connection, DSA, ALL, SUBTREE
 from time import sleep
@@ -9,7 +9,7 @@ from .smb import *
 from .utilities import *
 from .file import *
 from .classifier import *
-import pprint
+# import pprint
 
 log = logging.getLogger('snafflepy')
 
@@ -18,28 +18,28 @@ def begin_snaffle(options):
 
     # Prepare classifiers for use in naive_classify()
     snaff_rules = Rules()
-    # prepped_rules = snaff_rules.prepare_classifiers()
+    prepped_rules = snaff_rules.prepare_classifiers()
     # for dict_rules in prepped_rules:
     #   for actual_rule in dict_rules['ClassifierRules']:
     #       pprint.pprint(actual_rule['Triage'])
 
-
     print("Beginning the snaffle...")
     sleep(0.2)
 
-    if(not options.domain):
+    if not options.domain:
         log.info("Domain not provided, retrieving automatically.")
-        s = Server(options.targets[0], get_info = ALL)
+        s = Server(options.targets[0], get_info=ALL)
         c = Connection(s)
-        if(not c.bind()):
-             log.error("Could not get domain automatically")
-             sys.exit(1)
-        else:  
-             try:
-                options.domain = str(s.info.other["ldapServiceName"][0].split("@")[1]).lower()
-             except Exception as e:
-                 log.error("Could not get domain automatically")
-                 sys.exit(1)
+        if not c.bind():
+            log.error("Could not get domain automatically")
+            sys.exit(1)
+        else:
+            try:
+                options.domain = str(
+                    s.info.other["ldapServiceName"][0].split("@")[1]).lower()
+            except Exception as e:
+                log.error("Could not get domain automatically")
+                sys.exit(1)
         c.unbind()
 
     domain_names = []
@@ -58,7 +58,7 @@ def begin_snaffle(options):
                 f"Found{target}, adding to targets to snaffle...")
             sleep(0.5)
             try:
-                # TODO: Try to fix this? - How to resolve local IP address from Hostname
+                # TODO: Try to fix this? - How to resolve internal IP address from Hostname
                 # Supposedly SMBConnection should be able to take a hostname but not working as intended on the HTB enviroment I am using for testing
                 # ip = resolve(options.domain, target)
                 options.targets.append(target)
@@ -79,8 +79,8 @@ def begin_snaffle(options):
         except:
             log.error(f"Error logging in to SMB on {options.targets[0]}")
 
-    else:
-        log.info("Enumerating shares for files...")
+    if options.go_loud:
+        log.warning("[GO LOUD ACTIVATED] Enumerating all shares for all files...")
         for target in options.targets:
             try:
                 smb_client = SMBClient(
@@ -89,12 +89,12 @@ def begin_snaffle(options):
                 for share in smb_client.shares:
                     try:
                         files = smb_client.ls(share, "")
-                        
+
                         for file in files:
                             # filelist.append(file)
                             # Ask do they want file sizes?
-                            # log.info(f"{target} Found file in {share}: {file.get_longname()}")
-                            naive_classify(share, file, prepped_rules)
+                            log.info(f"{target} Found file in {share}: {file.get_longname()}")
+                            # naive_classify(share, file, prepped_rules)
                             # log.info(f"{target} Found file in {share}: {file}")
                     except FileListError:
                         log.error(
@@ -103,9 +103,8 @@ def begin_snaffle(options):
 
             except Exception as e:
                 log.error(f"Error creating SMBClient object, {e}")
-    
-    
-
+    else: 
+        pass
 
 def access_ldap_server(ip, username, password):
     log.info("Accessing LDAP Server")
@@ -166,30 +165,34 @@ def list_computers(connection: Connection, domain):
         return None
 
 # TODO
-def naive_classify(share, file, rules:Rules):
+
+
+def naive_classify(share, file, rules: Rules):
     log.info(f"{share}: {file.get_longname()}")
-    
 
     if is_interest(file, rules):
         log.info(f"Found interesting file: {share}/{file}")
 
+# These functions resolve to public IP Address: 
 
-# def resolve(nameserver, host_fqdn):
-#     resolver = dns.resolver.Resolver()
-#     resolver.nameservers = [nameserver]
-#     answer = resolver.query(host_fqdn, "A")
-#     return answer
+''' 
+def resolve(nameserver, host_fqdn):
+    resolver = dns.resolver.Resolver()
+    resolver.nameservers = [nameserver]
+    answer = resolver.query(host_fqdn, "A")
+    return answer
 
 
-# def get_ip(target):
-#     try:
-#         print(socket.gethostbyname(target))
-#     except socket.gaierror:
-#         parsed_url = urllib.parse.urlparse(target)
-#         hostname = parsed_url.hostname
-#         try:
-#             answers = dns.resolver.query(hostname, 'A')
-#             for rdata in answers:
-#                 print(rdata.address)
-#         except dns.resolver.NXDOMAIN:
-#             print('ip not found')
+def get_ip(target):
+    try:
+        print(socket.gethostbyname(target))
+    except socket.gaierror:
+        parsed_url = urllib.parse.urlparse(target)
+        hostname = parsed_url.hostname
+        try:
+            answers = dns.resolver.query(hostname, 'A')
+            for rdata in answers:
+                print(rdata.address)
+        except dns.resolver.NXDOMAIN:
+            print('ip not found') 
+'''

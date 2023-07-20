@@ -19,16 +19,18 @@ def parse_arguments():
         add_help=True, prog='snaffler.py', description='A "port" of Snaffler in python')
     parser.add_argument("targets", nargs='+', type=make_targets,
                         help="IPs, hostnames, CIDR ranges, or files contains targets to snaffle. If you are providing more than one target, the -n option must be used.")
-    parser.add_argument("-u", "--username", metavar='username',
+    parser.add_argument("-u", "--username",
                         type=str, help="domain username")
-    parser.add_argument("-p", "--password", metavar='password',
+    parser.add_argument("-p", "--password",
                         type=str, help="password for domain user")
-    parser.add_argument("-d", "--domain", metavar='domain',
-                        default="", help="FQDN domain to authenticate to")
-    parser.add_argument("-H", "--hash", metavar='hash',
+    parser.add_argument("-d", "--domain",
+                        default="", help="FQDN domain to authenticate to, if this option is not provided, SnafflePy will attempt to automatically discover the domain for you")
+    parser.add_argument("-H", "--hash",
                         default="", help="NT hash for authentication")
     parser.add_argument("-v", "--verbose",
                         action='store_true', help="Show more info")
+    parser.add_argument("--go-loud", action='store_true',
+                        help="Don't try to find anything interesting, literally just go through every computer and every share and print out as many files as possible. Use at your own risk")
     # parser.add_argument("-e", "--exclude",  )
 
     # TODO
@@ -60,6 +62,9 @@ def parse_arguments():
             [[targets.add(t) for t in g] for g in options.targets]
             options.targets = list(targets)
 
+            if len(options.targets) > 1 and not options.disable_computer_discovery:
+                log.error("If you have more than one target, then the -n option must be specified.")
+                sys.exit(2)
             return options
 
 
