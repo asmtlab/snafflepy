@@ -2,8 +2,11 @@
 Snaffler reimplementation in Python - https://github.com/SnaffCon/Snaffler 
 
 Tested with Python 3.10.6
+## Use case:
 
-## Installation (Linux) :
+Sometimes you do not always have access to a domain joined windows machine when you want to Snaffle. With this tool, you can "snaffle" (just get every file from every file share as of right now, but I am working on adding the classifier system that the real Snaffler uses) from the comfort of your operating system of choice!  
+
+## Installation (Linux):
 
 1. Clone this repository
 
