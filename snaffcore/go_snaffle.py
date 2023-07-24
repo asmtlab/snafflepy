@@ -18,7 +18,7 @@ def begin_snaffle(options):
 
     # Prepare classifiers for use in naive_classify()
     snaff_rules = Rules()
-    prepped_rules = snaff_rules.prepare_classifiers()
+    snaff_rules.prepare_classifiers()
     # for dict_rules in prepped_rules:
     #   for actual_rule in dict_rules['ClassifierRules']:
     #       pprint.pprint(actual_rule['Triage'])
@@ -78,15 +78,21 @@ def begin_snaffle(options):
             options.targets[0], options.username, options.password, options.domain, options.hash)
     except:
         log.error(f"Error logging in to SMB on {options.targets[0]}")
-
-    log.warning("[GO LOUD ACTIVATED] Enumerating all shares for all files...")
+    if options.go_loud:
+        log.warning("[GO LOUD ACTIVATED] Enumerating all shares for all files...")
     for target in options.targets:
         try:
             smb_client = SMBClient(
                 target, options.username, options.password, options.domain, options.hash)
-            smb_client.login()
+            if not smb_client.login():
+                log.error(f" Unable to login to{target}")
             for share in smb_client.shares:
                 try:
+                    if not options.go_loud:
+                        classify_share(share, snaff_rules)
+                    # else: 
+                    #    log.info(f"Found share: {share}")
+
                     files = smb_client.ls(share, "")
 
                     for file in files:
@@ -95,7 +101,7 @@ def begin_snaffle(options):
                         if options.go_loud:
                             log.info(f"{target}: {share}\\{file.get_longname()}")
                         else:
-                            naive_classify(share, file, prepped_rules)
+                            classify_file(share, file, snaff_rules)
 
                 except FileListError:
                     log.error(
@@ -152,7 +158,7 @@ def list_computers(connection: Connection, domain):
         # connection.search(search_base=dn,search_filter=filter,search_scope=SUBTREE,attributes=ALL_ATTRIBUTES)
         domain_names = []
 
-        log.debug(connection.entries)
+        # log.debug(connection.entries)
         for entry in connection.entries:
             sep = str(entry).strip().split(':')
             domain_names.append(sep[6])
@@ -166,12 +172,15 @@ def list_computers(connection: Connection, domain):
 # TODO
 
 
-def naive_classify(share, file, rules: Rules):
-    log.info(f"{share}: {file.get_longname()}")
+def classify_file(share, file, rules: Rules):
+    # log.info(f"{share}: {file.get_longname()}")
 
-    if is_interest(file, rules):
+    if is_interest_file(file, rules):
         log.info(f"Found interesting file: {share}/{file}")
 
+
+def classify_share(share, rules: Rules):
+    is_interest_share(share, rules)
 # These functions resolve to public IP Address: 
 
 ''' 

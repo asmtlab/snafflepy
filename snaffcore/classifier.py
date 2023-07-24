@@ -12,7 +12,8 @@ log = logging.getLogger('snafflepy.classifier')
 # TODO
 
 
-class Rules:
+class Rules:        
+
     def __init__(self) -> None:
         self.classifier_rules = []
         self.share_classifiers = []
@@ -53,7 +54,7 @@ class Rules:
 # TODO
 
 
-def is_interest(file, rules):
+def is_interest_file(file, rules) -> bool:
     # massive_wordlist = prepare_classifiers()
     # print(massive_wordlist)
     # for root, dirs, files in os.walk(snafflepy_path, topdown=False):
@@ -66,3 +67,45 @@ def is_interest(file, rules):
         return True
     else:
         return False
+
+def is_interest_share(share, rules: Rules):
+    regex_rules = []
+    # Tedium City to find match in wordlist. Did not prepare rules beforehand except by putting each MatchLocation in its own list
+    # so I have to do more work here before I can find the match
+
+    for rule in rules.share_classifiers:
+        if rule['WordListType'] == "Regex":
+            regex_rules = rule['WordList']
+            for pattern in regex_rules:
+                if re.search(str(pattern), str(share)) is not None:
+                    log.info(f"{share} matched {rule['RuleName']}:{rule['Description']}")
+
+        elif rule['WordListType'] == "EndsWith":
+            regex_rules = rule['WordList']
+            for pattern in regex_rules:
+                if re.search(str(pattern + "$"), str(share)) is not None:
+                    if rule['MatchAction'] == 'Snaffle':
+                        log.info(f"{share} matched rule {rule['RuleName']}:{rule['Description']}")
+                    else: 
+                        log.debug(f"{rule['MatchAction']} {share} matched rule {rule['RuleName']}:{rule['Description']}")
+
+        elif rule['WordListType'] == "StartsWith":
+            regex_rules = rule['WordList']
+            for pattern in regex_rules:
+                if re.search(str("^" + pattern), str(share)) is not None:
+                    log.warning(f"{share} matched rule {rule['RuleName']}: {rule['Description']}")
+
+        elif rule['WordListType'] == "Contains":
+            regex_rules = rule['WordList']
+            for pattern in regex_rules:
+                if re.search(str(pattern), str(share)) is not None:
+                    log.warning(f"{share} matched rule {rule['RuleName']}:{rule['Description']}")
+
+        elif rule['WordListType'] == "Exact":
+            regex_rules = rule['WordList']
+            for pattern in regex_rules:
+                if re.search(str("^" + pattern + "$"), str(share)) is not None:
+                    print(f"{share} matched {rule['RuleName']}:{rule['Description']}")
+
+        else:
+            log.warning(f"{rule['RuleName']} has an invalid WordListType - valid values are Regex, EndsWith, StartsWith, Contains, or Exact")
