@@ -7,5 +7,5 @@ MatchLocation = "ShareName"
 WordListType = "EndsWith"
 MatchLength = 0
 WordList = ["\\\\C\\$",
-"\\\\ADMIN\\$"]
+"\\\\ADMIN\\$", "ADMIN\\$", "C\\$"]
 Triage = "Black"
