@@ -74,4 +74,4 @@ options:
 `python3 snaffler.py <IP> -u <username> -p <password> -v`
 
 ## Output
-![output](https://github.com/robert-todora/snafflepy/assets/59801737/7bcb3ded-c75e-4d90-bc34-b9db7b42cac9)
+![output](https://github.com/robert-todora/snafflepy/assets/59801737/3bb345ed-2d54-4516-a53c-c6f7adf20923)
