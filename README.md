@@ -75,3 +75,6 @@ options:
 
 ## Output
 ![output](https://github.com/robert-todora/snafflepy/assets/59801737/3bb345ed-2d54-4516-a53c-c6f7adf20923)
+
+## Author Information
+Robert Todora - robert.todora@cisa.dhs.gov
