@@ -126,7 +126,7 @@ def begin_snaffle(options):
 
 
 def access_ldap_server(ip, username, password):
-    log.info("Accessing LDAP Server")
+    # log.info("Accessing LDAP Server")
     server = Server(ip, get_info=DSA)
     try:
         conn = Connection(server, username, password)

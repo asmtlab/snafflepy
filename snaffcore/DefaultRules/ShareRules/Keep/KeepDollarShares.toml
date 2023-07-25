@@ -2,7 +2,7 @@
 EnumerationScope = "ShareEnumeration"
 RuleName = "KeepDollarShares"
 MatchAction = "Snaffle"
-Description = "Notifies the user that C$ or ADMIN$ is visible on file share, but doesn't actually scan inside it."
+Description = "Notifies the user that C$ or ADMIN$ is visible, but doesn't actually scan inside the share."
 MatchLocation = "ShareName"
 WordListType = "Exact"
 MatchLength = 0
