@@ -61,4 +61,4 @@ options:
 `python3 snaffler.py <IP> -u <username> -p <password> -d <domain> --go-loud` 
 
 ## Output
-![example_snafflepy](https://github.com/robert-todora/snafflepy/assets/59801737/33c956da-ed00-4cb7-8444-bf158b67f1f8)
+![output](https://github.com/robert-todora/snafflepy/assets/59801737/7bcb3ded-c75e-4d90-bc34-b9db7b42cac9)
