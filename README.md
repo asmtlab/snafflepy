@@ -43,13 +43,12 @@ options:
   -p PASSWORD, --password PASSWORD
                         password for domain user
   -d DOMAIN, --domain DOMAIN
-                        FQDN domain to authenticate to, if this option is not provided, SnafflePy will attempt to automatically discover the domain for you
+                        FQDN domain to authenticate to, if this option is not provided, SnafflePy will attempt to automatically discover the domain                          for you
   -H HASH, --hash HASH  NT hash for authentication
   -v, --verbose         Show more info
-  --go-loud             Don't try to find anything interesting, literally just go through every computer and every share and print out as many files as possible. Use at your own
-                        risk
+  --go-loud             Don't try to find anything interesting, literally just go through every computer and every share and print out as many files                         as possible. Use at your own risk
   -i, --no-share-discovery
-                        Disables share discovery (more stealthy)
+                        Disables share discovery (stealthier)
   -n, --disable-computer-discovery
                         Disable computer discovery, requires a list of hosts to do discovery on
 ~~~
