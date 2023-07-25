@@ -20,6 +20,7 @@ pycparser==2.21
 pycryptodomex==3.18.0
 pyOpenSSL==23.2.0
 six==1.16.0
+termcolor==2.3.0
 toml==0.10.2
 userpath==1.8.0
 Werkzeug==2.3.6
