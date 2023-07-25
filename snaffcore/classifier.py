@@ -65,6 +65,7 @@ def is_interest_share(share, rules: Rules):
     for rule in rules.share_classifiers:
         regex_rules = []
         share_text = termcolor.colored("[Share]", 'yellow')
+        default_triage = termcolor.colored(f"{share}", 'green')
         if rule['WordListType'] == "Regex":
             regex_rules = rule['WordList']
             for pattern in regex_rules:

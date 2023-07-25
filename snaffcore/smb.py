@@ -1,6 +1,7 @@
 import ntpath
 import struct
 import logging
+import termcolor
 
 from .errors import *
 from impacket.nmb import NetBIOSError, NetBIOSTimeout
@@ -42,9 +43,11 @@ class SMBClient:
             for i in range(len(resp)):
                 sharename = resp[i]['shi1_netname'][:-1]
                 remarkname = resp[i]['shi1_remark'][:-1]
-                # fullname = resp[i]
-                # print(fullname)
-                log.info(f'Found share {sharename} on {self.server}, remark {remarkname}')
+                # log.info(f'Found share {sharename} on {self.server}, remark {remarkname}')
+                
+                share_text = termcolor.colored("[Share]", 'yellow')
+
+                print(share_text, termcolor.colored(f"{{Green}} \\\\{self.server}\\{sharename} ({remarkname})", 'green', 'on_white'))
                 # log.info(f'{self.server}: Share: {sharename}')
 
                 yield sharename
