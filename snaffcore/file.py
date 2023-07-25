@@ -1,7 +1,7 @@
-import io
 from .utilities import *
 from .errors import *
 from pathlib import Path
+import os
 
 # RT: Stolen from manspider - https://github.com/blacklanternsecurity/MANSPIDER
 
@@ -20,9 +20,18 @@ class RemoteFile():
         self.size = size
         self.smb_client = None
 
-        file_suffix = Path(name).suffix.lower()
-        self.tmp_filename = Path('/tmp/.snafflepy') / \
-            (random_string(15) + file_suffix)
+        does_exist = os.path.exists("remotefiles")
+        if not does_exist:
+            log.info("remotefiles directory not present, creating dir")
+            os.makedirs("remotefiles")
+            
+
+        # file_suffix = Path(name).suffix.lower()
+        self.tmp_filename = Path('./remotefiles') / \
+             (self.name)
+
+        # self.tmp_filename = Path('/tmp/.snafflepy') / \
+        #     (random_string(15) + file_suffix)
 
     def get(self, smb_client=None):
         '''
