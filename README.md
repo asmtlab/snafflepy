@@ -69,5 +69,9 @@ options:
 
 `python3 snaffler.py <IP> -u <username> -p <password> -d <domain> --go-loud` 
 
+2. Automatically discover the domain name and identify interesting shares and download the files from them, and notify you of files you couldn't download  
+
+`python3 snaffler.py <IP> -u <username> -p <password> -v`
+
 ## Output
 ![output](https://github.com/robert-todora/snafflepy/assets/59801737/7bcb3ded-c75e-4d90-bc34-b9db7b42cac9)
