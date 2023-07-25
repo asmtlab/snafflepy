@@ -78,7 +78,7 @@ class SMBClient:
                     assert False
 
                 log.debug(
-                    f'{self.server}: Authenticating as "{self.domain}\\{self.username}"')
+                    f'{self.server}: Authenticating as "{self.username}"')
 
                 # pass the hash if requested
                 if self.nthash and not self.password:
@@ -117,14 +117,14 @@ class SMBClient:
                                 log.warning(
                                     f'{self.server}: {s}: {self.username}')
 
-                    log.warning(f'{self.server}: Trying guest session')
+                    log.debug(f'{self.server}: Trying guest session')
                     self.username = 'Guest'
                     self.password = ''
                     self.domain = ''
                     self.nthash = ''
                     guest_success = self.login(refresh=True, first_try=False)
                     if not guest_success:
-                        log.warning(f'{self.server}: Switching to null session')
+                        log.debug(f'{self.server}: Switching to null session')
                         self.username = ''
                         self.login(refresh=True, first_try=False)
 

@@ -2,10 +2,11 @@ import re
 import toml
 import os
 import logging
-import pprint
+# import pprint
+import termcolor
 
 from impacket.smbconnection import SessionError, SMBConnection
-
+from .file import *
 
 log = logging.getLogger('snafflepy.classifier')
 
@@ -45,47 +46,42 @@ class Rules:
                         log.warning(
                             f"{dict_rule['RuleName']} is invalid, please check your syntax!")
 
-        #pprint.pprint(self.share_classifiers)
-        # pprint.pprint(self.directory_classifiers)
-        # pprint.pprint(self.file_classifiers)
-        # pprint.pprint(self.contents_classifiers)
-        # pprint.pprint(self.postmatch_classifiers)
-
 # TODO
 
-
-def is_interest_file(file, rules) -> bool:
-    # massive_wordlist = prepare_classifiers()
-    # print(massive_wordlist)
-    # for root, dirs, files in os.walk(snafflepy_path, topdown=False):
-    #     for name in files:
-    #         with open(os.path.join(root, name), 'rb') as tfile:
-    #             print(toml.loads(tfile))
-
-    interest_names = ["Creds.txt"]
+def is_interest_file(file:RemoteFile, rules, smb_client) -> bool:
+    file.get(smb_client)
+    '''
+    interest_names = []
     if file.get_shortname() in interest_names:
         return True
     else:
         return False
-
+    '''
 def is_interest_share(share, rules: Rules):
-    regex_rules = []
+    
     # Tedium City to find match in wordlist. Did not prepare rules beforehand except by putting each MatchLocation in its own list
     # so I have to do more work here before I can find the match
 
     for rule in rules.share_classifiers:
+        regex_rules = []
+        share_text = termcolor.colored("[Share]", 'yellow')
         if rule['WordListType'] == "Regex":
             regex_rules = rule['WordList']
             for pattern in regex_rules:
                 if re.search(str(pattern), str(share)) is not None:
-                    log.info(f"{share} matched {rule['RuleName']}:{rule['Description']}")
+                    if rule['MatchAction'] == "Snaffle":
+                        color = rule['Triage']
+                        print(share_text, termcolor.colored(f"{{{rule['Triage']}}} {share} <{rule['RuleName']}>:<{rule['Description']}>",str(color).lower(), 'on_white'))
+                    else: 
+                        log.debug(f"{rule['MatchAction']} {share} matched rule {rule['RuleName']}:{rule['Description']}")
 
         elif rule['WordListType'] == "EndsWith":
             regex_rules = rule['WordList']
             for pattern in regex_rules:
                 if re.search(str(pattern + "$"), str(share)) is not None:
-                    if rule['MatchAction'] == 'Snaffle':
-                        log.info(f"{share} matched rule {rule['RuleName']}:{rule['Description']}")
+                    if rule['MatchAction'] == "Snaffle":
+                        color = rule['Triage']
+                        print(share_text, termcolor.colored(f"{{{rule['Triage']}}} {share} <{rule['RuleName']}>:<{rule['Description']}>",str(color).lower(), 'on_white'))
                     else: 
                         log.debug(f"{rule['MatchAction']} {share} matched rule {rule['RuleName']}:{rule['Description']}")
 
@@ -93,19 +89,29 @@ def is_interest_share(share, rules: Rules):
             regex_rules = rule['WordList']
             for pattern in regex_rules:
                 if re.search(str("^" + pattern), str(share)) is not None:
-                    log.warning(f"{share} matched rule {rule['RuleName']}: {rule['Description']}")
+                    color = rule['Triage']
+                    print(share_text, termcolor.colored(f"{{{rule['Triage']}}} {share} <{rule['RuleName']}>:<{rule['Description']}>",str(color).lower(), 'on_white'))
 
         elif rule['WordListType'] == "Contains":
             regex_rules = rule['WordList']
             for pattern in regex_rules:
                 if re.search(str(pattern), str(share)) is not None:
-                    log.warning(f"{share} matched rule {rule['RuleName']}:{rule['Description']}")
+                    if rule['MatchAction'] == "Snaffle":
+                        color = rule['Triage']
+                        print(share_text, termcolor.colored(f"{{{rule['Triage']}}} {share} <{rule['RuleName']}>:<{rule['Description']}>",str(color).lower(), 'on_white'))
+                    else: 
+                        log.debug(f"{rule['MatchAction']} {share} matched rule {rule['RuleName']}:{rule['Description']}")
 
         elif rule['WordListType'] == "Exact":
             regex_rules = rule['WordList']
             for pattern in regex_rules:
                 if re.search(str("^" + pattern + "$"), str(share)) is not None:
-                    print(f"{share} matched {rule['RuleName']}:{rule['Description']}")
+                    if rule['MatchAction'] == "Snaffle":
+                        color = rule['Triage']
+                        print(share_text, termcolor.colored(f"{{{rule['Triage']}}} {share} <{rule['RuleName']}>:<{rule['Description']}>",str(color).lower(), 'on_white'))
+                    else: 
+                        log.debug(f"{rule['MatchAction']} {share} matched rule {rule['RuleName']}:{rule['Description']}")
 
         else:
             log.warning(f"{rule['RuleName']} has an invalid WordListType - valid values are Regex, EndsWith, StartsWith, Contains, or Exact")
+            raise Exception("Invalid WordListType")

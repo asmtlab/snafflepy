@@ -1,6 +1,7 @@
 import argparse
 import sys
 import logging
+import termcolor
 
 from snaffcore.go_snaffle import *
 from snaffcore.utilities import *
@@ -31,8 +32,8 @@ def parse_arguments():
                         action='store_true', help="Show more info")
     parser.add_argument("--go-loud", action='store_true',
                         help="Don't try to find anything interesting, literally just go through every computer and every share and print out as many files as possible. Use at your own risk")
-    # parser.add_argument("-e", "--exclude",  )
-
+    
+    parser.add_argument("-m", "--max-file-snaffle", metavar="size", type=int, default=10000, help="Max filesize to snaffle in bytes (any files over this size will be dropped)")
     # TODO
     parser.add_argument("-i", "--no-share-discovery", action='store_true',
                         help="Disables share discovery (more stealthy)")
@@ -90,6 +91,7 @@ def main():
 
     print("\nI snaffled 'til the snafflin was done")
     print("View log file at ~/.snafflepy/logs/")
+    print("Files snaffled from targets are available in <PATH-TO-SNAFFLEPY>/remotefiles/")
     sys.exit(1)
 
 

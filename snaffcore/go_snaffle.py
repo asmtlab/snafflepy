@@ -13,19 +13,14 @@ from .classifier import *
 
 log = logging.getLogger('snafflepy')
 
-
 def begin_snaffle(options):
 
-    # Prepare classifiers for use in naive_classify()
     snaff_rules = Rules()
     snaff_rules.prepare_classifiers()
-    # for dict_rules in prepped_rules:
-    #   for actual_rule in dict_rules['ClassifierRules']:
-    #       pprint.pprint(actual_rule['Triage'])
 
     print("Beginning the snaffle...")
-    sleep(0.2)
 
+    # Automatically get domain from target if not provided 
     if not options.domain:
         log.info("Domain not provided, retrieving automatically.")
         s = Server(options.targets[0], get_info=ALL)
@@ -67,7 +62,7 @@ def begin_snaffle(options):
                 log.warning(f"Unable to add{target} to targets to snaffle")
                 continue
 
-    log.debug(f"Targets that will be snaffled: {options.targets}")
+    # log.debug(f"Targets that will be snaffled: {options.targets}")
 
     # Login via SMB
     # log.info("Preparing classifiers...")
@@ -79,29 +74,47 @@ def begin_snaffle(options):
     except:
         log.error(f"Error logging in to SMB on {options.targets[0]}")
     if options.go_loud:
-        log.warning("[GO LOUD ACTIVATED] Enumerating all shares for all files...")
+        log.warning(
+            "[GO LOUD ACTIVATED] Enumerating all shares for all files...")
     for target in options.targets:
         try:
             smb_client = SMBClient(
                 target, options.username, options.password, options.domain, options.hash)
             if not smb_client.login():
                 log.error(f" Unable to login to{target}")
+                continue
             for share in smb_client.shares:
                 try:
                     if not options.go_loud:
                         classify_share(share, snaff_rules)
-                    # else: 
+                    # else:
                     #    log.info(f"Found share: {share}")
 
                     files = smb_client.ls(share, "")
 
                     for file in files:
-                        # filelist.append(file)
-                        # Ask do they want file sizes?
+                        size = file.get_filesize()
+                        name = file.get_longname()
+                        file = RemoteFile(name, share, target, size)
+
                         if options.go_loud:
-                            log.info(f"{target}: {share}\\{file.get_longname()}")
+                            # Dont care about empty files
+                            if size == 0:
+                                continue
+                            try:
+                                file.get(smb_client)
+                                log.info(f"{target}: {share}\\{name}")
+                            except FileRetrievalError:
+                                log.debug(f"Unable to download ({target}\\\\{share}\\{name})")
                         else:
-                            classify_file(share, file, snaff_rules)
+                            if size >= options.max_file_snaffle:
+                                pass
+                            else:
+                                try:
+                                    classify_file(file, snaff_rules, smb_client)
+                                except FileRetrievalError as e:
+                                    log.debug(f"{e}")
+                                    continue
 
                 except FileListError:
                     log.error(
@@ -109,7 +122,8 @@ def begin_snaffle(options):
                     continue
 
         except Exception as e:
-            log.error(f"Error creating SMBClient object, {e}")
+            log.debug(f"{e}")
+
 
 def access_ldap_server(ip, username, password):
     log.info("Accessing LDAP Server")
@@ -119,7 +133,8 @@ def access_ldap_server(ip, username, password):
         # log.debug(server.schema)
 
         if not conn.bind():
-            log.critical(f"Unable to bind to {server} as {username}, ")
+            log.critical(f"Unable to bind to {server}")
+            return None
         return conn
 
     except Exception as e:
@@ -127,38 +142,36 @@ def access_ldap_server(ip, username, password):
         log.info("Trying guest session... ")
 
         try:
-            conn = Connection(server, username='Guest', password='')
+            conn = Connection(server, user='Guest', password='')
             if not conn.bind():
                 log.critical(f"Unable to bind to {server} as {username}")
+                return None
             return conn
 
         except Exception as e:
             log.critical(f'Error logging in to {ip}, as {username}')
             log.info("Trying null session... ")
 
-            conn = Connection(server, username='', password='')
+            conn = Connection(server, user='', password='')
             if not conn.bind():
-                log.critical(f"Unable to bind to {server} as {username}")
+                log.critical(f"Unable to bind to {server}")
                 return None
             return conn
 
 # 2nd snaffle step, finding additional targets from original target via LDAP queries
-
 
 def list_computers(connection: Connection, domain):
     dn = get_domain_dn(domain)
     # filter = "(objectCategory=computer)"
     if connection is None:
         log.critical("Connection is not established")
+        sys.exit(2)
 
     try:
         connection.search(search_base=dn, search_filter='(&(objectCategory=Computer)(name=*))',
                           search_scope=SUBTREE, attributes=['dNSHostName'], paged_size=500)
-        # log.debug(connection.entries)
-        # connection.search(search_base=dn,search_filter=filter,search_scope=SUBTREE,attributes=ALL_ATTRIBUTES)
         domain_names = []
 
-        # log.debug(connection.entries)
         for entry in connection.entries:
             sep = str(entry).strip().split(':')
             domain_names.append(sep[6])
@@ -172,35 +185,9 @@ def list_computers(connection: Connection, domain):
 # TODO
 
 
-def classify_file(share, file, rules: Rules):
-    # log.info(f"{share}: {file.get_longname()}")
-
-    if is_interest_file(file, rules):
-        log.info(f"Found interesting file: {share}/{file}")
-
+def classify_file(file: RemoteFile, rules: Rules, smb_client: SMBClient):
+    is_interest_file(file, rules, smb_client)
 
 def classify_share(share, rules: Rules):
     is_interest_share(share, rules)
-# These functions resolve to public IP Address: 
 
-''' 
-def resolve(nameserver, host_fqdn):
-    resolver = dns.resolver.Resolver()
-    resolver.nameservers = [nameserver]
-    answer = resolver.query(host_fqdn, "A")
-    return answer
-
-
-def get_ip(target):
-    try:
-        print(socket.gethostbyname(target))
-    except socket.gaierror:
-        parsed_url = urllib.parse.urlparse(target)
-        hostname = parsed_url.hostname
-        try:
-            answers = dns.resolver.query(hostname, 'A')
-            for rdata in answers:
-                print(rdata.address)
-        except dns.resolver.NXDOMAIN:
-            print('ip not found') 
-'''
