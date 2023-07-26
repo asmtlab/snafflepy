@@ -1,15 +1,10 @@
 import sys
-# import socket
-# import urllib.parse
-# import dns.resolver
 
 from ldap3 import ALL_ATTRIBUTES, Server, Connection, DSA, ALL, SUBTREE
-from time import sleep
 from .smb import *
 from .utilities import *
 from .file import *
 from .classifier import *
-# import pprint
 
 log = logging.getLogger('snafflepy')
 
@@ -22,23 +17,11 @@ def begin_snaffle(options):
 
     # Automatically get domain from target if not provided 
     if not options.domain:
-        log.info("Domain not provided, retrieving automatically.")
-        s = Server(options.targets[0], get_info=ALL)
-        c = Connection(s)
-        if not c.bind():
-            log.error("Could not get domain automatically")
-            sys.exit(1)
-        else:
-            try:
-                options.domain = str(
-                    s.info.other["ldapServiceName"][0].split("@")[1]).lower()
-            except Exception as e:
-                log.error("Could not get domain automatically")
-                sys.exit(1)
-        c.unbind()
+        options.domain = get_domain(options.targets[0])
+        if options.domain == "":
+            sys.exit(2)
 
     domain_names = []
-    # TODO: Talk to AD via LDAP to get list of computers with file shares
     if options.disable_computer_discovery:
         log.info(
             "Computer discovery is turned off. Snaffling will only occur on the host(s) specified.")
@@ -47,27 +30,15 @@ def begin_snaffle(options):
         login = access_ldap_server(
             options.targets[0], options.username, options.password)
         domain_names = list_computers(login, options.domain)
-        # list_computers() returns list so need to individually add entry
         for target in domain_names:
             log.debug(
                 f"Found{target}, adding to targets to snaffle...")
-            sleep(0.5)
             try:
-                # TODO: Try to fix this? - How to resolve internal IP address from Hostname
-                # Supposedly SMBConnection should be able to take a hostname but not working as intended on the HTB enviroment I am using for testing
-                # ip = resolve(options.domain, target)
                 options.targets.append(target)
             except Exception as e:
                 log.debug(f"Exception: {e}")
                 log.warning(f"Unable to add{target} to targets to snaffle")
                 continue
-
-    # log.debug(f"Targets that will be snaffled: {options.targets}")
-
-    # Login via SMB
-    # log.info("Preparing classifiers...")
-    # prepare_classifiers()
-
     try:
         smb_client = SMBClient(
             options.targets[0], options.username, options.password, options.domain, options.hash)
@@ -81,15 +52,12 @@ def begin_snaffle(options):
             smb_client = SMBClient(
                 target, options.username, options.password, options.domain, options.hash)
             if not smb_client.login():
-                log.error(f" Unable to login to{target}")
+                log.error(f"Unable to login to{target}")
                 continue
             for share in smb_client.shares:
                 try:
                     if not options.go_loud:
-                        classify_share(share, snaff_rules)
-                    # else:
-                    #    log.info(f"Found share: {share}")
-
+                        is_interest_share(share, snaff_rules)
                     files = smb_client.ls(share, "")
 
                     for file in files:
@@ -98,27 +66,30 @@ def begin_snaffle(options):
                         file = RemoteFile(name, share, target, size)
 
                         if options.go_loud:
-                            # Dont care about empty files
-                            if size == 0:
-                                continue
                             try:
+                                file_text = termcolor.colored("[File]", 'green')
                                 file.get(smb_client)
-                                log.info(f"{target}: {share}\\{name}")
-                            except FileRetrievalError:
-                                log.debug(f"Unable to download ({target}\\\\{share}\\{name})")
+                                print(file_text, f"\\\\{target}\\{share}\\{name}")
+                            except FileRetrievalError as e:
+                                dir_path = file.name
+                                # Check if its a directory, and try to list files/more directories here
+                                smb_client.handle_download_error(share, dir_path, e)
+                                if str(e).find("ACCESS_DENIED"):
+                                        log.debug(f"Access Denied \\\\{target}\\{share}\\{file}")
+                                continue
                         else:
                             if size >= options.max_file_snaffle:
-                                pass
+                                continue
                             else:
                                 try:
-                                    classify_file(file, snaff_rules, smb_client)
+                                    is_interest_file(file, snaff_rules, smb_client)
                                 except FileRetrievalError as e:
-                                    log.debug(f"{e}")
+                                    if str(e).find("ACCESS_DENIED"):
+                                        log.debug(f"Access Denied, cannot download \\\\{target}\\{share}\\ {file}")
                                     continue
 
-                except FileListError:
-                    log.error(
-                        "Access Denied, cannot list files in %s" % share)
+                except FileListError as e:
+                    log.error(f"{share}, {e}")
                     continue
 
         except Exception as e:
@@ -162,7 +133,6 @@ def access_ldap_server(ip, username, password):
 
 def list_computers(connection: Connection, domain):
     dn = get_domain_dn(domain)
-    # filter = "(objectCategory=computer)"
     if connection is None:
         log.critical("Connection is not established")
         sys.exit(2)
@@ -182,12 +152,5 @@ def list_computers(connection: Connection, domain):
         log.critical(f"Unable to list computers: {e}")
         return None
 
-# TODO
 
-
-def classify_file(file: RemoteFile, rules: Rules, smb_client: SMBClient):
-    is_interest_file(file, rules, smb_client)
-
-def classify_share(share, rules: Rules):
-    is_interest_share(share, rules)
 

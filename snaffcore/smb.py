@@ -4,6 +4,7 @@ import logging
 import termcolor
 
 from .errors import *
+from .file import *
 from impacket.nmb import NetBIOSError, NetBIOSTimeout
 from impacket.smbconnection import SessionError, SMBConnection
 
@@ -45,7 +46,7 @@ class SMBClient:
                 remarkname = resp[i]['shi1_remark'][:-1]
                 # log.info(f'Found share {sharename} on {self.server}, remark {remarkname}')
                 
-                share_text = termcolor.colored("[Share]", 'yellow')
+                share_text = termcolor.colored("[Share]", 'light_yellow')
 
                 print(share_text, termcolor.colored(f"{{Green}} \\\\{self.server}\\{sharename} ({remarkname})", 'green', 'on_white'))
                 # log.info(f'{self.server}: Share: {sharename}')
@@ -164,3 +165,28 @@ class SMBClient:
         log.debug(
             f'Rebuilding connection to {self.server} after error: {error}')
         self.login(refresh=True)
+
+    # Handle download errors and recurse into directories
+    def handle_download_error(self, share, dir_path, err):
+    
+        while str(err).find("STATUS_FILE_IS_A_DIRECTORY") != -1:
+            try:
+                subfiles = self.ls(share, str(dir_path))
+                for subfile in subfiles:
+                    sub_size = subfile.get_filesize()
+                    sub_name = str(dir_path + "\\" + subfile.get_longname())
+                    subfile = RemoteFile(sub_name, share, self.server, sub_size)
+                    subfile.get(self)
+
+                    file_text = termcolor.colored("[File]", 'green')
+                    print(file_text, f"\\\\{self.server}\\{share}\\{sub_name}")
+                        
+                    self.handle_download_error(share, sub_name, err)
+            except:
+                break 
+            finally:
+                break
+
+
+                                
+        
