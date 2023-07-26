@@ -5,10 +5,12 @@ import random
 import logging
 import ipaddress
 from pathlib import Path
+from ldap3 import ALL_ATTRIBUTES, Server, Connection, DSA, ALL, SUBTREE
+
 
 # RT: Stolen from manspider - https://github.com/blacklanternsecurity/MANSPIDER
 
-log = logging.getLogger('snafflerpy.util')
+log = logging.getLogger('snafflepy.util')
 
 
 def str_to_list(s):
@@ -149,3 +151,24 @@ def get_domain_dn(domain):
         base_dn += 'DC=%s,' % i
     base_dn = base_dn[:-1]
     return base_dn
+
+def get_domain(target):
+
+    log.debug("Domain not provided, retrieving automatically.")
+    s = Server(target, get_info=ALL)
+    c = Connection(s)
+    if not c.bind():
+        log.error("Could not get domain automatically")
+        return ""
+
+    else:
+        try:
+            domain = str(s.info.other["ldapServiceName"][0].split("@")[1]).lower()
+
+        except Exception as e:
+            log.error("Could not get domain automatically")
+            domain = ""
+
+    c.unbind()
+    log.debug(f"Domain:{domain}")
+    return domain

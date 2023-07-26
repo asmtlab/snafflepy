@@ -59,4 +59,4 @@ class RemoteFile():
 
     def __str__(self):
 
-        return f'{self.target}\\{self.share}\\{self.name}'
+        return f'\\\\{self.target}\\{self.share}\\{self.name}'
