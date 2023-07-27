@@ -70,26 +70,26 @@ def begin_snaffle(options):
                                 file_text = termcolor.colored("[File]", 'green')
                                 file.get(smb_client)
                                 print(file_text, f"\\\\{target}\\{share}\\{name}")
+
                             except FileRetrievalError as e:
-                                dir_path = file.name
                                 # Check if its a directory, and try to list files/more directories here
-                                smb_client.handle_download_error(share, dir_path, e)
-                                if str(e).find("ACCESS_DENIED"):
-                                        log.debug(f"Access Denied \\\\{target}\\{share}\\{file}")
-                                continue
+                                smb_client.handle_download_error(share, file.name, e)
+                                # if str(e).find("ACCESS_DENIED"):
+                                #         log.debug(f"Access Denied {file}")
+                                # continue
                         else:
                             if size >= options.max_file_snaffle:
                                 continue
                             else:
                                 try:
-                                    is_interest_file(file, snaff_rules, smb_client)
+                                    is_interest_file(file, snaff_rules, smb_client, share)
                                 except FileRetrievalError as e:
                                     if str(e).find("ACCESS_DENIED"):
-                                        log.debug(f"Access Denied, cannot download \\\\{target}\\{share}\\ {file}")
+                                        log.debug(f"Access Denied, cannot download \\\\{target}\\{share}\\{file}")
                                     continue
 
                 except FileListError as e:
-                    log.error(f"{share}, {e}")
+                    log.error(f"Access denied, cannot read at {share}")
                     continue
 
         except Exception as e:

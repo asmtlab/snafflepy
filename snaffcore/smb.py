@@ -168,24 +168,40 @@ class SMBClient:
 
     # Handle download errors and recurse into directories
     def handle_download_error(self, share, dir_path, err):
-    
-        while str(err).find("STATUS_FILE_IS_A_DIRECTORY") != -1:
+        if str(err).find("STATUS_FILE_IS_A_DIRECTORY"):
+            dir_text = termcolor.colored("[Directory]", 'light_blue')
+            print(dir_text, f"\\\\{self.server}\\{share}\\{dir_path}")
+        #     log.error(f"{self.server} {dir_path} {err}")
+        # else:   
             try:
                 subfiles = self.ls(share, str(dir_path))
-                for subfile in subfiles:
-                    sub_size = subfile.get_filesize()
-                    sub_name = str(dir_path + "\\" + subfile.get_longname())
+                # print(list(subfiles), len(list(subfiles)))
+            except FileListError as e:
+                pass
+            # print(len(list(subfiles)))
+            # while str(err).find("STATUS_FILE_IS_A_DIRECTORY") != -1:
+            
+            for subfile in subfiles:
+                
+                sub_size = subfile.get_filesize()
+                sub_name = str(dir_path + "\\" + subfile.get_longname())
+
+                try:
                     subfile = RemoteFile(sub_name, share, self.server, sub_size)
                     subfile.get(self)
 
                     file_text = termcolor.colored("[File]", 'green')
                     print(file_text, f"\\\\{self.server}\\{share}\\{sub_name}")
-                        
-                    self.handle_download_error(share, sub_name, err)
-            except:
-                break 
-            finally:
-                break
+
+                    # self.handle_download_error(share, sub_name, err)
+                except Exception as e:
+                    if str(err).find("STATUS_FILE_IS_A_DIRECTORY"):
+                        dir_text = termcolor.colored("[Directory]", 'light_blue')
+                        print(dir_text, f"\\\\{self.server}\\{share}\\{sub_name}")
+
+                        self.handle_download_error(share, sub_name, e)
+                    elif str(err).find("ACCESS_DENIED"):
+                        continue 
 
 
                                 

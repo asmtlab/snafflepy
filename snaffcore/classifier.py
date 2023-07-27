@@ -48,15 +48,9 @@ class Rules:
 
 # TODO
 
-def is_interest_file(file:RemoteFile, rules, smb_client) -> bool:
+def is_interest_file(file:RemoteFile, rules, smb_client, share):
     file.get(smb_client)
-    '''
-    interest_names = []
-    if file.get_shortname() in interest_names:
-        return True
-    else:
-        return False
-    '''
+    
 def is_interest_share(share, rules: Rules):
     
     # Tedium City to find match in wordlist. Did not prepare rules beforehand except by putting each MatchLocation in its own list
@@ -64,7 +58,7 @@ def is_interest_share(share, rules: Rules):
 
     for rule in rules.share_classifiers:
         regex_rules = []
-        share_text = termcolor.colored("[Share]", 'yellow')
+        share_text = termcolor.colored("[Share]", 'light_yellow')
         default_triage = termcolor.colored(f"{share}", 'green')
         if rule['WordListType'] == "Regex":
             regex_rules = rule['WordList']
