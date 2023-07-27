@@ -177,7 +177,7 @@ class SMBClient:
                 subfiles = self.ls(share, str(dir_path))
                 # print(list(subfiles), len(list(subfiles)))
             except FileListError as e:
-                pass
+                log.error(f"Access denied, cannot read at \\\\{self.server}\\{share}\\{dir_path}")
             # print(len(list(subfiles)))
             # while str(err).find("STATUS_FILE_IS_A_DIRECTORY") != -1:
             

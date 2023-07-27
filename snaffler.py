@@ -15,7 +15,6 @@ def parse_arguments():
     syntax_error = False
     print("SnafflePy by @robert-todora")
 
-    # TODO - Check that if targets > 1 then "-n" needs to be set to true
     parser = argparse.ArgumentParser(
         add_help=True, prog='snaffler.py', description='A "port" of Snaffler in python')
     parser.add_argument("targets", nargs='+', type=make_targets,
