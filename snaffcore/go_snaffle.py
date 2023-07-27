@@ -59,10 +59,11 @@ def begin_snaffle(options):
                     if not options.go_loud:
                         is_interest_share(share, snaff_rules)
                     files = smb_client.ls(share, "")
-
+                    bad_name = ""
                     for file in files:
                         size = file.get_filesize()
                         name = file.get_longname()
+                        bad_name = name
                         file = RemoteFile(name, share, target, size)
 
                         if options.go_loud:
@@ -84,12 +85,12 @@ def begin_snaffle(options):
                                 try:
                                     is_interest_file(file, snaff_rules, smb_client, share)
                                 except FileRetrievalError as e:
-                                    if str(e).find("ACCESS_DENIED"):
-                                        log.debug(f"Access Denied, cannot download \\\\{target}\\{share}\\{file}")
+                                    # if str(e).find("ACCESS_DENIED"):
+                                    #     log.debug(f"Access Denied, cannot download \\\\{target}\\{share}\\{file}")
                                     continue
 
                 except FileListError as e:
-                    log.error(f"Access denied, cannot read at {share}")
+                    log.error(f"Access denied, cannot read at {target}\\{share}\\{bad_name}")
                     continue
 
         except Exception as e:
