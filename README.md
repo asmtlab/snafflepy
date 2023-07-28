@@ -30,51 +30,45 @@ Sometimes you do not always have access to a domain joined windows machine when 
 ## Usage and Options
 ~~~
 SnafflePy by @robert-todora
-usage: snaffler.py [-h] [-u USERNAME] [-p PASSWORD] [-d DOMAIN] [-H HASH] [-v] [--go-loud] [-m size] [-i] [-n] targets [targets ...]
+usage: snaffler.py [-h] [-u USERNAME] [-p PASSWORD] [-d DOMAIN] [-H HASH] [-v] [--go-loud] [-m size] [-n] targets [targets ...]
 
 A "port" of Snaffler in python
 
 positional arguments:
-  targets               IPs, hostnames, CIDR ranges, or files contains targets to snaffle. If you are providing more than one target, the -n option must be used.
+  targets               IPs, hostnames, CIDR ranges, or files contains targets to snaffle. If you are providing more than one target, the -n option must                           be used.
 
 options:
   -h, --help            show this help message and exit
-
   -u USERNAME, --username USERNAME
                         domain username
-
   -p PASSWORD, --password PASSWORD
                         password for domain user
-
   -d DOMAIN, --domain DOMAIN
-                        FQDN domain to authenticate to, if this option is not provided, SnafflePy will attempt to automatically discover the domain for you
-
+                        FQDN domain to authenticate to, if this option is not provided, SnafflePy will attempt to automatically discover the
+                        domain for you
   -H HASH, --hash HASH  NT hash for authentication
-
   -v, --verbose         Show more info
-
-  --go-loud             Don't try to find anything interesting, literally just go through every computer and every share and print out as many files as possible. Use at your own risk
-
+  --go-loud             Don't try to find anything interesting, literally just go through every computer and every share and print out as many
+                        files as possible. Use at your own risk
   -m size, --max-file-snaffle size
                         Max filesize to snaffle in bytes (any files over this size will be dropped)
-  -i, --no-share-discovery
-                        Disables share discovery (more stealthy)
   -n, --disable-computer-discovery
                         Disable computer discovery, requires a list of hosts to do discovery on
 ~~~
 
 ## Examples
 
-1. Print out every file in every share on all reachable targets 
+1. Snaffle all files, directories, and shares and output them to stdout, files will be downloaded to ~<PATH-TO-PROJECT>remotefiles/~ 
 
 `python3 snaffler.py <IP> -u <username> -p <password> -d <domain> --go-loud` 
 
-2. Automatically discover the domain name and identify interesting shares and download the files from them, and notify you of files you couldn't download  
+2. Automatically discover the domain name and identify interesting shares and find a limited number of interesting files from them  
 
 `python3 snaffler.py <IP> -u <username> -p <password> -v`
 
 ## Output
-![output](https://github.com/robert-todora/snafflepy/assets/59801737/3bb345ed-2d54-4516-a53c-c6f7adf20923)
+![output](https://github.com/robert-todora/snafflepy/assets/59801737/120e801f-85cf-4315-8ab1-f736f4f97abb)
+
 
 ## Author Information
 Robert Todora - robert.todora@cisa.dhs.gov
