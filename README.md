@@ -58,7 +58,7 @@ options:
 
 ## Examples
 
-1. Snaffle all files, directories, and shares and output them to stdout, files will be downloaded to ~<PATH-TO-PROJECT>remotefiles/~ 
+1. Snaffle all files, directories, and shares and output them to stdout, files will be downloaded to `PATH-TO-PROJECT/remotefiles/` 
 
 `python3 snaffler.py <IP> -u <username> -p <password> -d <domain> --go-loud` 
 
