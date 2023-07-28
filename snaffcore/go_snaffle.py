@@ -85,8 +85,7 @@ def begin_snaffle(options):
                                 try:
                                     is_interest_file(file, snaff_rules, smb_client, share)
                                 except FileRetrievalError as e:
-                                    # if str(e).find("ACCESS_DENIED"):
-                                    #     log.debug(f"Access Denied, cannot download \\\\{target}\\{share}\\{file}")
+                                    smb_client.handle_download_error(share, file.name, e)
                                     continue
 
                 except FileListError as e:

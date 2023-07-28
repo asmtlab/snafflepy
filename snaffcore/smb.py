@@ -178,8 +178,7 @@ class SMBClient:
                 # print(list(subfiles), len(list(subfiles)))
             except FileListError as e:
                 log.error(f"Access denied, cannot read at \\\\{self.server}\\{share}\\{dir_path}")
-            # print(len(list(subfiles)))
-            # while str(err).find("STATUS_FILE_IS_A_DIRECTORY") != -1:
+            
             
             for subfile in subfiles:
                 
@@ -193,6 +192,7 @@ class SMBClient:
                     file_text = termcolor.colored("[File]", 'green')
                     print(file_text, f"\\\\{self.server}\\{share}\\{sub_name}")
 
+                    yield subfile
                     # self.handle_download_error(share, sub_name, err)
                 except Exception as e:
                     if str(err).find("STATUS_FILE_IS_A_DIRECTORY"):

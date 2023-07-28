@@ -6,6 +6,7 @@ import logging
 import termcolor
 
 from impacket.smbconnection import SessionError, SMBConnection
+from .smb import *
 from .file import *
 
 log = logging.getLogger('snafflepy.classifier')
@@ -48,9 +49,29 @@ class Rules:
 
 # TODO
 
-def is_interest_file(file:RemoteFile, rules, smb_client, share):
-    file.get(smb_client)
+def is_interest_file(file:RemoteFile, rules: Rules, smb_client: SMBClient, share):
+    backup_ext_list = [".bak", ".mdf", ".sqldump", ".sdf"]
+    cred_list = ["creds", "password", "passw", "credentials"]
+
+    file_text = termcolor.colored(f"[File]", "green")
+    ssn_regex = str("^\d{{3}}-\d{{2}}-\d{{4}}$")
+    for ext in backup_ext_list:
+        if re.search(str(ext), str(file.name).lower()):
+            file_triage = termcolor.colored(f"{{Yellow}}\\\\{file.target}\\{share}\\{file.name} <KeepBackupFiles>", "light_yellow", "on_white")
+            try:
+                file.get(smb_client)
+                print(file_text, file_triage)
+            except FileRetrievalError as e:
+                smb_client.handle_download_error(share, file.name, e)
+    for cred in cred_list:
+        if re.search(str(cred), str(file.name).lower()):
+            file_triage = termcolor.colored(f"{{Black}}\\\\{file.target}\\{share}\\{file.name} <KeepFilesWithInterestName>", "black", "on_white")
+            file.get(smb_client)
+            print(file_text, file_triage)
     
+
+
+
 def is_interest_share(share, rules: Rules):
     
     # Tedium City to find match in wordlist. Did not prepare rules beforehand except by putting each MatchLocation in its own list
