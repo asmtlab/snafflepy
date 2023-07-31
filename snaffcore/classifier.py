@@ -58,36 +58,43 @@ def is_interest_file(file:RemoteFile, rules: Rules, smb_client: SMBClient, share
     ssn_regex = str("^\d{{3}}-\d{{2}}-\d{{4}}$")
 
     # Non-file shares
-    if str(share).lower().find("ipc") or str(share).lower().find("print"):
-        pass
-    else:
-        file_data = ""
-        file.get(smb_client)
+    # if str(share).lower().find("ipc") or str(share).lower().find("print"):
+    #     pass
+    # else:
 
-        # MVP Build only, check for SSN in files
-        with open(str(file.tmp_filename)) as f:
-            file_data = f.read(10000)
-            if re.search(ssn_regex, file_text):
-                file_triage = termcolor.colored(f"{{Red}}\\\\{file.target}\\{share}\\{file.name} <SsnRegexFound>", "light_yellow", "on_white")
-                print(file_text, file_triage)
-
-        # MVP Build only, check for backup files
-        for ext in backup_ext_list:
-            if re.search(str(ext), str(file.name).lower()):
-                file_triage = termcolor.colored(f"{{Yellow}}\\\\{file.target}\\{share}\\{file.name} <KeepBackupFiles>", "light_yellow", "on_white")
-                try:
-                    file.get(smb_client)
-                    print(file_text, file_triage)
-                except FileRetrievalError as e:
-                    smb_client.handle_download_error(share, file.name, e)
-
-        # MVP Build only, check for files with possible passwords contained inside         
-        for cred in cred_list:
-            if re.search(str(cred), str(file.name).lower()):
-                file_triage = termcolor.colored(f"{{Black}}\\\\{file.target}\\{share}\\{file.name} <KeepFilesWithInterestName>", "black", "on_white")
+    # MVP Build only, check for SSN in files
+    
+    # MVP Build only, check for backup files
+    for ext in backup_ext_list:
+        if re.search(str(ext), str(file.name).lower()):
+            file_triage = termcolor.colored(f"{{Yellow}}\\\\{file.target}\\{share}\\{file.name} <KeepBackupFiles>", "light_yellow", "on_white")
+            try:
                 file.get(smb_client)
                 print(file_text, file_triage)
-    
+            except FileRetrievalError as e:
+                smb_client.handle_download_error(share, file.name, e)
+
+    # MVP Build only, check for files with possible passwords contained inside         
+    for cred in cred_list:
+        if re.search(str(cred), str(file.name).lower()):
+            file_triage = termcolor.colored(f"{{Black}}\\\\{file.target}\\{share}\\{file.name} <KeepFilesWithInterestName>", "black", "on_white")
+            try:
+                file.get(smb_client)
+                print(file_text, file_triage)
+            except FileRetrievalError as e:
+                smb_client.handle_download_error(share, file.name, e)
+
+
+    file_data = ""
+    try:
+        file.get(smb_client)
+        with open(str(file.tmp_filename), 'rb') as f:
+            file_data = str(f.read(10000))
+            if re.search(ssn_regex, file_data):
+                file_triage = termcolor.colored(f"{{Red}}\\\\{file.target}\\{share}\\{file.name} <SsnRegexFound>", "light_yellow", "on_white")
+                print(file_text, file_triage)
+    except FileRetrievalError as e:
+        smb_client.handle_download_error(share, file.name, e)
 
 
 
