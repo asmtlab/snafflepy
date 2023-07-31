@@ -70,9 +70,9 @@ def is_interest_file(file:RemoteFile, rules: Rules, smb_client: SMBClient, share
             file_triage = termcolor.colored(f"{{Yellow}}\\\\{file.target}\\{share}\\{file.name} <KeepBackupFiles>", "light_yellow", "on_white")
             try:
                 file.get(smb_client)
-                print(file_text, file_triage)
+                log.info(f"{file_text} {file_triage}")
             except FileRetrievalError as e:
-                smb_client.handle_download_error(share, file.name, e)
+                smb_client.handle_download_error(share, file.name, e, False)
 
     # MVP Build only, check for files with possible passwords contained inside         
     for cred in cred_list:
@@ -80,9 +80,9 @@ def is_interest_file(file:RemoteFile, rules: Rules, smb_client: SMBClient, share
             file_triage = termcolor.colored(f"{{Black}}\\\\{file.target}\\{share}\\{file.name} <KeepFilesWithInterestName>", "black", "on_white")
             try:
                 file.get(smb_client)
-                print(file_text, file_triage)
+                log.info(f"{file_text} {file_triage}")
             except FileRetrievalError as e:
-                smb_client.handle_download_error(share, file.name, e)
+                smb_client.handle_download_error(share, file.name, e, False)
 
 
     file_data = ""
@@ -92,9 +92,9 @@ def is_interest_file(file:RemoteFile, rules: Rules, smb_client: SMBClient, share
             file_data = str(f.read(10000))
             if re.search(ssn_regex, file_data):
                 file_triage = termcolor.colored(f"{{Red}}\\\\{file.target}\\{share}\\{file.name} <SsnRegexFound>", "light_yellow", "on_white")
-                print(file_text, file_triage)
+                log.info(f"{file_text} {file_triage}")
     except FileRetrievalError as e:
-        smb_client.handle_download_error(share, file.name, e)
+        smb_client.handle_download_error(share, file.name, e, False)
 
 
 
@@ -124,6 +124,7 @@ def is_interest_share(share, rules: Rules):
                     if rule['MatchAction'] == "Snaffle":
                         color = rule['Triage']
                         print(share_text, termcolor.colored(f"{{{rule['Triage']}}} {share} <{rule['RuleName']}>:<{rule['Description']}>",str(color).lower(), 'on_white'))
+                        
                     else: 
                         log.debug(f"{rule['MatchAction']} {share} matched rule {rule['RuleName']}:{rule['Description']}")
 

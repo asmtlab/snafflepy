@@ -70,11 +70,11 @@ def begin_snaffle(options):
                             try:
                                 file_text = termcolor.colored("[File]", 'green')
                                 file.get(smb_client)
-                                print(file_text, f"\\\\{target}\\{share}\\{name}")
+                                log.info(f"{file_text} \\\\{target}\\{share}\\{name}")
 
                             except FileRetrievalError as e:
                                 # Check if its a directory, and try to list files/more directories here
-                                smb_client.handle_download_error(share, file.name, e)
+                                smb_client.handle_download_error(share, file.name, e, True)
                                 # if str(e).find("ACCESS_DENIED"):
                                 #         log.debug(f"Access Denied {file}")
                                 # continue
@@ -85,7 +85,7 @@ def begin_snaffle(options):
                                 try:
                                     is_interest_file(file, snaff_rules, smb_client, share)
                                 except FileRetrievalError as e:
-                                    smb_client.handle_download_error(share, file.name, e)
+                                    smb_client.handle_download_error(share, file.name, e, False)
                                     continue
 
                 except FileListError as e:
