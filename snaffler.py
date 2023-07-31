@@ -34,8 +34,8 @@ def parse_arguments():
     
     parser.add_argument("-m", "--max-file-snaffle", metavar="size", type=int, default=10000, help="Max filesize to snaffle in bytes (any files over this size will be dropped)")
     # TODO
-    parser.add_argument("-i", "--no-share-discovery", action='store_true',
-                        help="Disables share discovery (more stealthy)")
+    # parser.add_argument("-i", "--no-share-discovery", action='store_true',
+    #                    help="Disables share discovery (more stealthy)")
     parser.add_argument("-n", "--disable-computer-discovery", action='store_true',
                         help="Disable computer discovery, requires a list of hosts to do discovery on")
 
