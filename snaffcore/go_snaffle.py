@@ -31,7 +31,7 @@ def begin_snaffle(options):
             options.targets[0], options.username, options.password)
         domain_names = list_computers(login, options.domain)
         for target in domain_names:
-            log.debug(
+            log.info(
                 f"Found{target}, adding to targets to snaffle...")
             try:
                 options.targets.append(target)

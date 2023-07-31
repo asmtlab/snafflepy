@@ -192,7 +192,7 @@ class SMBClient:
                     file_text = termcolor.colored("[File]", 'green')
                     print(file_text, f"\\\\{self.server}\\{share}\\{sub_name}")
 
-                    yield subfile
+                    
                     # self.handle_download_error(share, sub_name, err)
                 except Exception as e:
                     if str(err).find("STATUS_FILE_IS_A_DIRECTORY"):
