@@ -91,7 +91,7 @@ def main():
     print("\nI snaffled 'til the snafflin was done")
     print("View log file at ~/.snafflepy/logs/")
     print("Files snaffled from targets are available in <PATH-TO-SNAFFLEPY>/remotefiles/")
-    sys.exit(1)
+    sys.exit(0)
 
 
 if __name__ == '__main__':
