@@ -1,12 +1,14 @@
 import sys
 
 from ldap3 import ALL_ATTRIBUTES, Server, Connection, DSA, ALL, SUBTREE
-from .smb import *
+from .smb import * 
 from .utilities import *
-from .file import *
+from .file_handling import *
 from .classifier import *
+from .errors import *
 
 log = logging.getLogger('snafflepy')
+
 
 def begin_snaffle(options):
 
@@ -15,7 +17,7 @@ def begin_snaffle(options):
 
     print("Beginning the snaffle...")
 
-    # Automatically get domain from target if not provided 
+    # Automatically get domain from target if not provided
     if not options.domain:
         options.domain = get_domain(options.targets[0])
         if options.domain == "":
@@ -39,62 +41,61 @@ def begin_snaffle(options):
                 log.debug(f"Exception: {e}")
                 log.warning(f"Unable to add{target} to targets to snaffle")
                 continue
-    try:
-        smb_client = SMBClient(
-            options.targets[0], options.username, options.password, options.domain, options.hash)
-    except:
-        log.error(f"Error logging in to SMB on {options.targets[0]}")
+
     if options.go_loud:
         log.warning(
             "[GO LOUD ACTIVATED] Enumerating all shares for all files...")
+    if options.no_download:
+        log.warning("[no-download] is turned on, skipping SSN check...")
+        
     for target in options.targets:
-        try:
-            smb_client = SMBClient(
-                target, options.username, options.password, options.domain, options.hash)
-            if not smb_client.login():
-                log.error(f"Unable to login to{target}")
-                continue
-            for share in smb_client.shares:
-                try:
-                    if not options.go_loud:
-                        is_interest_share(share, snaff_rules)
-                    files = smb_client.ls(share, "")
-                    bad_name = ""
-                    for file in files:
-                        size = file.get_filesize()
-                        name = file.get_longname()
-                        bad_name = name
-                        file = RemoteFile(name, share, target, size)
 
-                        if options.go_loud:
-                            try:
-                                file_text = termcolor.colored("[File]", 'green')
+        smb_client = SMBClient(
+            target, options.username, options.password, options.domain, options.hash)
+        if not smb_client.login():
+            log.error(f"Unable to login to{target}")
+            continue
+        
+        for share in smb_client.shares:
+            try:
+                if not options.go_loud:
+                    is_interest_share(share, snaff_rules)
+                files = smb_client.ls(share, "")
+            
+            
+                for file in files:
+                    size = file.get_filesize()
+                    name = file.get_longname()
+                    # bad_name = name
+                    file = RemoteFile(name, share, target, size, smb_client)
+
+                    if options.go_loud:
+                        try:
+                            file_text = termcolor.colored("[File]", 'green')
+                            if not options.no_download:
                                 file.get(smb_client)
-                                log.info(f"{file_text} \\\\{target}\\{share}\\{name}")
+                            log.info(
+                                f"{file_text} \\\\{target}\\{share}\\{name}")
 
-                            except FileRetrievalError as e:
-                                # Check if its a directory, and try to list files/more directories here
-                                smb_client.handle_download_error(share, file.name, e, True)
-                                # if str(e).find("ACCESS_DENIED"):
-                                #         log.debug(f"Access Denied {file}")
-                                # continue
+                        except FileRetrievalError as e:
+                            # Check if its a directory, and try to list files/more directories here
+                            file.handle_download_error(
+                                file.name, e, True, False)
+                            
+                    else:
+                        if size >= options.max_file_snaffle:
+                            pass
                         else:
-                            if size >= options.max_file_snaffle:
-                                continue
-                            else:
-                                try:
-                                    is_interest_file(file, snaff_rules, smb_client, share)
-                                except FileRetrievalError as e:
-                                    smb_client.handle_download_error(share, file.name, e, False)
-                                    continue
-
-                except FileListError as e:
-                    log.error(f"Access denied, cannot read at {target}\\{share}\\{bad_name}")
-                    continue
-
-        except Exception as e:
-            log.debug(f"{e}")
-
+                            try:
+                                is_interest_file(file, smb_client, share, options.no_download)
+                            except FileRetrievalError as e:
+                                file.handle_download_error(
+                                    file.name, e, False, False)
+                                
+            except FileListError as e:
+                log.error(f"Cannot list files at {share} {e}")
+                
+           
 
 def access_ldap_server(ip, username, password):
     # log.info("Accessing LDAP Server")
@@ -131,6 +132,7 @@ def access_ldap_server(ip, username, password):
 
 # 2nd snaffle step, finding additional targets from original target via LDAP queries
 
+
 def list_computers(connection: Connection, domain):
     dn = get_domain_dn(domain)
     if connection is None:
@@ -151,6 +153,3 @@ def list_computers(connection: Connection, domain):
     except Exception as e:
         log.critical(f"Unable to list computers: {e}")
         return None
-
-
-

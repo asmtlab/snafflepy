@@ -1,7 +1,5 @@
 # created by virtualenv automatically
 snaffcore/__pycache__/
-snaffcore/active_directory/
-.idea
 .vscode
 snafflepy/
-testcmd.txt
+remotefiles/

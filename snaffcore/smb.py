@@ -3,8 +3,8 @@ import struct
 import logging
 import termcolor
 
-from .errors import *
-from .file import *
+# from .errors import *
+from .file_handling import *
 from impacket.nmb import NetBIOSError, NetBIOSTimeout
 from impacket.smbconnection import SessionError, SMBConnection
 
@@ -45,10 +45,11 @@ class SMBClient:
                 sharename = resp[i]['shi1_netname'][:-1]
                 remarkname = resp[i]['shi1_remark'][:-1]
                 # log.info(f'Found share {sharename} on {self.server}, remark {remarkname}')
-                
+
                 share_text = termcolor.colored("[Share]", 'light_yellow')
 
-                print(share_text, termcolor.colored(f"{{Green}} \\\\{self.server}\\{sharename} ({remarkname})", 'green', 'on_white'))
+                print(share_text, termcolor.colored(
+                    f"{{Green}} \\\\{self.server}\\{sharename} ({remarkname})", 'green', 'on_white'))
                 # log.info(f'{self.server}: Share: {sharename}')
 
                 yield sharename
@@ -166,48 +167,87 @@ class SMBClient:
             f'Rebuilding connection to {self.server} after error: {error}')
         self.login(refresh=True)
 
-    # Handle download errors and recurse into directories
-    def handle_download_error(self, share, dir_path, err, isFromGoLoud:bool):
-        if str(err).find("STATUS_FILE_IS_A_DIRECTORY"):
-            dir_text = termcolor.colored("[Directory]", 'light_blue')
-            if isFromGoLoud:
-                log.info(f"{dir_text}\\\\{self.server}\\{share}\\{dir_path}")   
-            try:
-                subfiles = self.ls(share, str(dir_path))
-                
-            except FileListError as e:
-                log.error(f"Access denied, cannot read at \\\\{self.server}\\{share}\\{dir_path}")
-            
-            
-            for subfile in subfiles:
-                
-                sub_size = subfile.get_filesize()
-                sub_name = str(dir_path + "\\" + subfile.get_longname())
+    # Handle download errors and recurse into directories, current implementation may not work properly
+    # I think there needs to be a finally block that goes through the current directory and tries to get any remaining files/dirs because
+    # it will stop as soon as it finds one subdirectory
+    # def handle_download_error(self, share, dir_path, err, isFromGoLoud:bool):
+    #     add_err = False
+    #     problem_files = []
 
-                try:
-                    subfile = RemoteFile(sub_name, share, self.server, sub_size)
-                    subfile.get(self)
+    #     if str(err).find("STATUS_FILE_IS_A_DIRECTORY"):
+    #         dir_text = termcolor.colored("[Directory]", 'light_blue')
 
-                    file_text = termcolor.colored("[File]", 'green')
-                    if isFromGoLoud:
-                        log.info(f"{file_text} \\\\{self.server}\\{share}\\{sub_name}")
+    #         if isFromGoLoud:
+    #             log.info(f"{dir_text}\\\\{self.server}\\{share}\\{dir_path}")
 
-                    
-                    # self.handle_download_error(share, sub_name, err)
-                except Exception as e:
-                    if str(err).find("STATUS_FILE_IS_A_DIRECTORY"):
-                        dir_text = termcolor.colored("[Directory]", 'light_blue')
+    #         subfiles = self.ls(share, str(dir_path))
 
-                        if isFromGoLoud:
-                            log.info(f"{dir_text}\\\\{self.server}\\{share}\\{sub_name}")
-                            self.handle_download_error(share, sub_name, e, True)
+    #         for subfile in subfiles:
+    #             sub_size = subfile.get_filesize()
+    #             sub_name = str(dir_path + "\\" + subfile.get_longname())
 
-                        else:
-                            self.handle_download_error(share, sub_name, e, False)
+    #             # try:
+    #             subfile = RemoteFile(sub_name, share, self.server, sub_size)
+    #             subfile.get(self)
 
-                    elif str(err).find("ACCESS_DENIED"):
-                        continue 
+    #             if FileRetrievalError:
+    #                 add_Err = True
+    #                 problem_files.append(subfile)
+    #                 continue
+    #             else:
+    #                 file_text = termcolor.colored("[File]", 'green')
+    #                 if isFromGoLoud:
+    #                     log.info(f"{file_text} \\\\{self.server}\\{share}\\{sub_name}")
 
+    #             # except FileRetrievalError as e:
+    #             if str(err).find("STATUS_FILE_IS_A_DIRECTORY"):
+    #                 dir_text = termcolor.colored("[Directory]", 'light_blue')
 
-                                
-        
+    #                 if isFromGoLoud:
+    #                     log.info(f"{dir_text}\\\\{self.server}\\{share}\\{sub_name}")
+    #                     self.handle_download_error(share, sub_name, e, True)
+
+    #                 else:
+    #                     self.handle_download_error(share, sub_name, e, False)
+
+    #             elif str(err).find("ACCESS_DENIED"):
+    #                 continue
+
+        # ORIGINAL
+        # if str(err).find("STATUS_FILE_IS_A_DIRECTORY"):
+        #     dir_text = termcolor.colored("[Directory]", 'light_blue')
+        #     if isFromGoLoud:
+        #         log.info(f"{dir_text}\\\\{self.server}\\{share}\\{dir_path}")
+        #     try:
+        #         subfiles = self.ls(share, str(dir_path))
+
+        #     except FileListError as e:
+        #         log.error(f"Access denied, cannot read at \\\\{self.server}\\{share}\\{dir_path}")
+
+        #     for subfile in subfiles:
+
+        #         sub_size = subfile.get_filesize()
+        #         sub_name = str(dir_path + "\\" + subfile.get_longname())
+
+        #         try:
+        #             subfile = RemoteFile(sub_name, share, self.server, sub_size)
+        #             subfile.get(self)
+
+        #             file_text = termcolor.colored("[File]", 'green')
+        #             if isFromGoLoud:
+        #                 log.info(f"{file_text} \\\\{self.server}\\{share}\\{sub_name}")
+
+        #             # self.handle_download_error(share, sub_name, err)
+        #         except Exception as e:
+        #             if str(err).find("STATUS_FILE_IS_A_DIRECTORY"):
+        #                 dir_text = termcolor.colored("[Directory]", 'light_blue')
+
+        #                 if isFromGoLoud:
+        #                     log.info(f"{dir_text}\\\\{self.server}\\{share}\\{sub_name}")
+        #                     self.handle_download_error(share, sub_name, e, True)
+
+        #                 else:
+        #                     self.handle_download_error(share, sub_name, e, False)
+
+        #             elif str(err).find("ACCESS_DENIED"):
+        #                 continue

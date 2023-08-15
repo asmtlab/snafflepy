@@ -38,6 +38,8 @@ def parse_arguments():
     #                    help="Disables share discovery (more stealthy)")
     parser.add_argument("-n", "--disable-computer-discovery", action='store_true',
                         help="Disable computer discovery, requires a list of hosts to do discovery on")
+    
+    parser.add_argument("--no-download", action='store_true', help="Don't download files, just print found file names to stdout - this can only show the top level of files from the share and is unable to recurse into subdirectories.")
 
     try:
         if len(sys.argv) <= 1:
@@ -91,7 +93,7 @@ def main():
     print("\nI snaffled 'til the snafflin was done")
     print("View log file at ~/.snafflepy/logs/")
     print("Files snaffled from targets are available in <PATH-TO-SNAFFLEPY>/remotefiles/")
-    sys.exit(1)
+    sys.exit(0)
 
 
 if __name__ == '__main__':
