@@ -66,8 +66,8 @@ options:
 `python3 snaffler.py <IP> -u <username> -p <password> -v`
 
 ## Output
-<img width="186" alt="Output" src="https://github.com/robert-todora/snafflepy/assets/59801737/33934bb7-63bb-4f23-8314-59f3cf357e73">
 
+<img width="866" alt="Screenshot 2023-08-15 at 3 40 37 PM" src="https://github.com/robert-todora/snafflepy/assets/59801737/96e34f2f-c055-4c07-a02a-05476db10b0f">
 
 
 ## Author Information
