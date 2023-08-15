@@ -30,12 +30,12 @@ Sometimes you do not always have access to a domain joined windows machine when 
 ## Usage and Options
 ~~~
 SnafflePy by @robert-todora
-usage: snaffler.py [-h] [-u USERNAME] [-p PASSWORD] [-d DOMAIN] [-H HASH] [-v] [--go-loud] [-m size] [-n] targets [targets ...]
+usage: snaffler.py [-h] [-u USERNAME] [-p PASSWORD] [-d DOMAIN] [-H HASH] [-v] [--go-loud] [-m size] [-n] [--no-download] targets [targets ...]
 
 A "port" of Snaffler in python
 
 positional arguments:
-  targets               IPs, hostnames, CIDR ranges, or files contains targets to snaffle. If you are providing more than one target, the -n option must                           be used.
+  targets               IPs, hostnames, CIDR ranges, or files contains targets to snaffle. If you are providing more than one target, the -n option must be used.
 
 options:
   -h, --help            show this help message and exit
@@ -44,16 +44,15 @@ options:
   -p PASSWORD, --password PASSWORD
                         password for domain user
   -d DOMAIN, --domain DOMAIN
-                        FQDN domain to authenticate to, if this option is not provided, SnafflePy will attempt to automatically discover the
-                        domain for you
+                        FQDN domain to authenticate to, if this option is not provided, SnafflePy will attempt to automatically discover the domain for you
   -H HASH, --hash HASH  NT hash for authentication
   -v, --verbose         Show more info
-  --go-loud             Don't try to find anything interesting, literally just go through every computer and every share and print out as many
-                        files as possible. Use at your own risk
+  --go-loud             Don't try to find anything interesting, literally just go through every computer and every share and print out as many files as possible. Use at your own risk
   -m size, --max-file-snaffle size
                         Max filesize to snaffle in bytes (any files over this size will be dropped)
   -n, --disable-computer-discovery
                         Disable computer discovery, requires a list of hosts to do discovery on
+  --no-download         Don't download files, just print found file names to stdout - this can only show the top level of files from the share and is unable to recurse into subdirectories.
 ~~~
 
 ## Examples
