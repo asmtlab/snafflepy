@@ -67,7 +67,7 @@ options:
 
 ## Output
 
-<img width="866" alt="Screenshot 2023-08-15 at 3 40 37 PM" src="https://github.com/robert-todora/snafflepy/assets/59801737/96e34f2f-c055-4c07-a02a-05476db10b0f">
+<img width="866" alt="Screenshot 2023-08-15 at 3 40 37 PM" src="https://github.com/robert-todora/snafflepy/assets/59801737/5023092f-03cf-4430-a1b2-3dcefa256c99">
 
 
 ## Author Information
