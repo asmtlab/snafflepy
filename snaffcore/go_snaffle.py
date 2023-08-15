@@ -3,7 +3,7 @@ import sys
 from ldap3 import ALL_ATTRIBUTES, Server, Connection, DSA, ALL, SUBTREE
 from .smb import * 
 from .utilities import *
-from .file import *
+from .file_handling import *
 from .classifier import *
 from .errors import *
 
@@ -41,14 +41,13 @@ def begin_snaffle(options):
                 log.debug(f"Exception: {e}")
                 log.warning(f"Unable to add{target} to targets to snaffle")
                 continue
-    # try:
-    #     smb_client = SMBClient(
-    #         options.targets[0], options.username, options.password, options.domain, options.hash)
-    # except:
-    #     log.error(f"Error logging in to SMB on {options.targets[0]}")
+
     if options.go_loud:
         log.warning(
             "[GO LOUD ACTIVATED] Enumerating all shares for all files...")
+    if options.no_download:
+        log.warning("[no-download] is turned on, skipping SSN check...")
+        
     for target in options.targets:
 
         smb_client = SMBClient(
@@ -73,7 +72,8 @@ def begin_snaffle(options):
                     if options.go_loud:
                         try:
                             file_text = termcolor.colored("[File]", 'green')
-                            file.get(smb_client)
+                            if not options.no_download:
+                                file.get(smb_client)
                             log.info(
                                 f"{file_text} \\\\{target}\\{share}\\{name}")
 
@@ -87,13 +87,13 @@ def begin_snaffle(options):
                             pass
                         else:
                             try:
-                                is_interest_file(file, smb_client, share)
+                                is_interest_file(file, smb_client, share, options.no_download)
                             except FileRetrievalError as e:
                                 file.handle_download_error(
                                     file.name, e, False, False)
                                 
             except FileListError as e:
-                log.error(f"Access Denied cannot list files at {share} :{e}")
+                log.error(f"Cannot list files at {share} {e}")
                 
            
 

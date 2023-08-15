@@ -7,7 +7,7 @@ import termcolor
 
 from impacket.smbconnection import SessionError, SMBConnection
 from .smb import *
-from .file import *
+from .file_handling import *
 
 log = logging.getLogger('snafflepy.classifier')
 
@@ -50,14 +50,16 @@ class Rules:
 # TODO
 
 
-def is_interest_file(file: RemoteFile, smb_client: SMBClient, share):
+def is_interest_file(file, smb_client, share, no_download: bool):
     backup_ext_list = [".bak", ".mdf", ".sqldump", ".sdf", ".dmp"]
     cred_list = ["creds", "password", "passw", "credentials", "login", "secret", "account", "pass",
                  ".kdb", ".psafe3", ".kwallet", ".keychain", ".agilekeychain", ".cred"]
 
     file_text = termcolor.colored(f"[File]", "green")
     ssn_regex = str("^\d{{3}}-\d{{2}}-\d{{4}}$")
-
+    is_interest = False
+    
+    
     # Non-file shares
     # if str(share).lower().find("ipc") or str(share).lower().find("print"):
     #     pass
@@ -68,6 +70,7 @@ def is_interest_file(file: RemoteFile, smb_client: SMBClient, share):
     # MVP Build only, check for backup files
     for ext in backup_ext_list:
         if re.search(str(ext), str(file.name).lower()):
+            is_interest = True
             file_triage = termcolor.colored(
                 f"{{Yellow}}\\\\{file.target}\\{share}\\{file.name} <KeepBackupFiles>", "light_yellow", "on_white")
             try:
@@ -79,24 +82,34 @@ def is_interest_file(file: RemoteFile, smb_client: SMBClient, share):
     # MVP Build only, check for files with possible passwords contained inside
     for cred in cred_list:
         if re.search(str(cred), str(file.name).lower()):
+            is_interest = True
+
             file_triage = termcolor.colored(
                 f"{{Black}}\\\\{file.target}\\{share}\\{file.name} <KeepFilesWithInterestName>", "black", "on_white")
             try:
-                file.get(smb_client)
+                if not no_download:
+                    file.get(smb_client)
                 log.info(f"{file_text} {file_triage}")
             except FileRetrievalError as e:
                 file.handle_download_error(file.name, e, False, False)
 
     file_data = ""
     try:
-        file.get(smb_client)
-        with open(str(file.tmp_filename), 'rb') as f:
-            file_data = str(f.read(10000))
-            if re.search(ssn_regex, file_data):
-                file_triage = termcolor.colored(
-                    f"{{Red}}\\\\{file.target}\\{share}\\{file.name} <SsnRegexFound>", "light_yellow", "on_white")
-                log.info(f"{file_text} {file_triage}")
+        if not no_download:
+            file.get(smb_client)
+            with open(str(file.tmp_filename), 'rb') as f:
+                file_data = str(f.read(10000))
+                if re.search(ssn_regex, file_data):
+                    file_triage = termcolor.colored(
+                        f"{{Red}}\\\\{file.target}\\{share}\\{file.name} <SsnRegexFound>", "light_yellow", "on_white")
+                    log.info(f"{file_text} {file_triage}")
+                elif not is_interest:
+                    # print(file.name)
+                    os.remove(f"./{file.tmp_filename}")
+        else: 
+            pass
     except FileRetrievalError as e:
+        os.remove(f"./{file.tmp_filename}")
         file.handle_download_error(file.name, e, False, False)
 
 

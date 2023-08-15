@@ -38,6 +38,8 @@ def parse_arguments():
     #                    help="Disables share discovery (more stealthy)")
     parser.add_argument("-n", "--disable-computer-discovery", action='store_true',
                         help="Disable computer discovery, requires a list of hosts to do discovery on")
+    
+    parser.add_argument("--no-download", action='store_true', help="Don't download files, just print found file names to stdout - this can only show the top level of files from the share and is unable to recurse into subdirectories.")
 
     try:
         if len(sys.argv) <= 1:

@@ -3,8 +3,8 @@ import struct
 import logging
 import termcolor
 
-from .errors import *
-from .file import *
+# from .errors import *
+from .file_handling import *
 from impacket.nmb import NetBIOSError, NetBIOSTimeout
 from impacket.smbconnection import SessionError, SMBConnection
 

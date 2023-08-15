@@ -1,6 +1,6 @@
 from .utilities import *
 from .errors import *
-# from .classifier import *
+# from .classifier import is_interest_file
 from pathlib import Path
 import os
 import termcolor
@@ -63,13 +63,13 @@ class RemoteFile():
 
         return f'\\\\{self.target}\\{self.share}\\{self.name}'
 
-    def handle_download_error(self, dir_path, err, isFromGoLoud: bool, add_err: bool):
+    def handle_download_error(self, dir_path, err, is_from_go_loud: bool, add_err: bool):
         # subfiles = []
 
         if str(err).find("DIRECTORY"):
             dir_text = termcolor.colored("[Directory]", 'light_blue')
 
-            if isFromGoLoud:
+            if is_from_go_loud:
                 log.info(
                     f"{dir_text} \\\\{self.target}\\{self.share}\\{dir_path}")
             try:
@@ -84,7 +84,10 @@ class RemoteFile():
                     try:
                         subfile = RemoteFile(
                             sub_name, self.share, self.target, sub_size)
-                        subfile.get(self.smb_client)
+                        if is_from_go_loud:
+                            subfile.get(self.smb_client)
+                        # else: 
+                            # is_interest_file(self, self.smb_client, self.share)
                         add_err = False
 
                     except FileRetrievalError as e:
@@ -96,23 +99,13 @@ class RemoteFile():
                         if add_err:
                             # print(error)
                             self.handle_download_error(
-                                sub_name, err, isFromGoLoud, True)
+                                sub_name, err, is_from_go_loud, True)
                         else:
                             file_text = termcolor.colored("[File]", 'green')
-                            if isFromGoLoud:
+                            if is_from_go_loud:
                                 log.info(
                                     f"{file_text} \\\\{self.target}\\{self.share}\\{sub_name}")
             except FileListError as e:
-                log.error(
-                    f"Access denied, cannot read at {self.target}\\{self.share}\\{dir_path}")
-                        # else:
-                        #     is_interest_file(subfile, self.smb_client, self.share)
-
-                # dir_text = termcolor.colored("[Directory]", 'light_blue')
-
-                # if isFromGoLoud:
-                #     log.info(f"{dir_text}\\\\{self.server}\\{share}\\{sub_name}")
-                #     self.handle_download_error(share, sub_name, e, True)
-
-                # else:
-                #     self.handle_download_error(share, sub_name, e, False)
+                if is_from_go_loud:
+                    log.error(
+                        f"Access denied, cannot read at {self.target}\\{self.share}\\{dir_path}")
