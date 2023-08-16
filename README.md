@@ -9,6 +9,7 @@ This tool works by first sending a LDAP query to the specified target to discove
 
 ### Current Features: 
 SnafflePy includes different options and methods of enumeration. It can discover AD joined computers automatically by performing specific LDAP queries to Active Directory and include them in its target list, or if you want to disable this, it can also manually take in a list of IPs, hostnames, or CIDR ranges as its targets. It can also return every share and filename that is readable on the target network, authenticated or unauthenticated. If the credentials provided fail, then SnafflePy will automatically attempt to login via a Guest user, and if that fails it will attempt to login via a “NULL” session. It also supports the original TOML rule formats from Snaffler and uses them to identify interesting share names and return them to the user. 
+Currently, SnafflePy can identify common password files by extension and name, backup files by extension, and SSN by regex in file content. 
 
 ### Features to Add: 
 1. Classifier system from Snaffler to find interesting files
@@ -17,7 +18,7 @@ SnafflePy includes different options and methods of enumeration. It can discover
 
 ## Use case:
 
-Sometimes you do not always have access to a domain joined windows machine when you want to Snaffle. With this tool, you can "snaffle" (just get every file from every file share as of right now, but I am working on adding the classifier system that the real Snaffler uses) from a non windows machine!  
+Sometimes you do not always have access to a domain joined windows machine when you want to Snaffle. With this tool, you can "snaffle" from a non windows machine!  
 
 ## Installation (Linux):
 
