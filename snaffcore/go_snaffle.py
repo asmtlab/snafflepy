@@ -1,9 +1,9 @@
 import sys
 
 from ldap3 import ALL_ATTRIBUTES, Server, Connection, DSA, ALL, SUBTREE
-from .smb import * 
+# from .smb import * 
 from .utilities import *
-from .file_handling import *
+# from .file_handling import *
 from .classifier import *
 from .errors import *
 
