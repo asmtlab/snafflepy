@@ -1,6 +1,6 @@
 from .utilities import *
 from .errors import *
-# from .classifier import is_interest_file
+
 from pathlib import Path
 import os
 import termcolor
