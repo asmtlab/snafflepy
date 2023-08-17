@@ -1,7 +1,7 @@
 import argparse
 import sys
 import logging
-import termcolor
+import os
 
 from snaffcore.go_snaffle import *
 from snaffcore.utilities import *
@@ -93,7 +93,7 @@ def main():
     print("\nI snaffled 'til the snafflin was done")
     print("View log file at ~/.snafflepy/logs/")
     print("Files snaffled from targets are available in <PATH-TO-SNAFFLEPY>/remotefiles/")
-    sys.exit(0)
+    sys.exit()
 
 
 if __name__ == '__main__':

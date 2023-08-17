@@ -57,10 +57,15 @@ def begin_snaffle(options):
             continue
         
         for share in smb_client.shares:
+            files = []
             try:
                 if not options.go_loud:
-                    is_interest_share(share, snaff_rules)
+                    if is_interest_share(share, snaff_rules) == False:
+                        log.debug(f"{share} matched a Discard rule, skipping files inside of this share...")
+                        continue
+                    
                 files = smb_client.ls(share, "")
+
             
             
                 for file in files:
@@ -78,9 +83,11 @@ def begin_snaffle(options):
                                 f"{file_text} \\\\{target}\\{share}\\{name}")
 
                         except FileRetrievalError as e:
+                            no_add_error = False
+                            keep_dir_name = True
                             # Check if its a directory, and try to list files/more directories here
                             file.handle_download_error(
-                                file.name, e, True, False)
+                                file.name, e, options.go_loud, no_add_error)
                             
                     else:
                         if size >= options.max_file_snaffle:
@@ -89,11 +96,16 @@ def begin_snaffle(options):
                             try:
                                 is_interest_file(file, smb_client, share, options.no_download)
                             except FileRetrievalError as e:
+                                # Error will trigger if access denied to file, or the file is actually a directory
+                                # File 
+                                # keep_dir_name = classify_directory(file.name, snaff_rules)
+                                no_add_error = False
                                 file.handle_download_error(
-                                    file.name, e, False, False)
+                                    file.name, e, options.go_loud, no_add_error)
                                 
             except FileListError as e:
                 log.error(f"Cannot list files at {share} {e}")
+    
                 
            
 

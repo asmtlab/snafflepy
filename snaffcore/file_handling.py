@@ -65,7 +65,6 @@ class RemoteFile():
 
     def handle_download_error(self, dir_path, err, is_from_go_loud: bool, add_err: bool):
         # subfiles = []
-
         if str(err).find("DIRECTORY"):
             dir_text = termcolor.colored("[Directory]", 'light_blue')
 
