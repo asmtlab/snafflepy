@@ -116,11 +116,10 @@ class SMBClient:
 
                     bad_statuses = [
                         'LOGON_FAIL', 'PASSWORD_EXPIRED', 'LOCKED_OUT', 'SESSION_DELETED']
-                    if any([s in str(e) for s in bad_statuses]):
-                        for s in bad_statuses:
-                            if s in str(e):
-                                log.warning(
-                                    f'{self.server}: {s}: {self.username}')
+                    for s in bad_statuses:
+                        if s in str(e):
+                            log.warning(
+                                f'{self.server}: {s}: {self.username}')
 
                     log.debug(f'{self.server}: Trying guest session')
                     self.username = 'Guest'
