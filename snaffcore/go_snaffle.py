@@ -158,7 +158,9 @@ def list_computers(connection: Connection, domain):
 
         for entry in connection.entries:
             sep = str(entry).strip().split(':')
-            domain_names.append(sep[6])
+            # Sometimes there's no dNSHostName
+            if len(sep) == 7:
+                domain_names.append(sep[6])
 
         return domain_names
 
